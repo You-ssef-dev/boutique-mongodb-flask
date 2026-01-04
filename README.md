@@ -15,3 +15,4 @@ python db_init.py
 python app.py
 ```
 Open **http://localhost:5000**
+# Boutique-en-ligne-compl-te
