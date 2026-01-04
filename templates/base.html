@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BoutiqueComplete1{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <span class="logo-icon">🛍️</span>
+                <span class="logo-text">Boutique<span class="accent">Complete</span></span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">
+                <span class="nav-icon">📊</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="/products" class="nav-link {% if request.endpoint == 'products_page' %}active{% endif %}">
+                <span class="nav-icon">📦</span>
+                <span>Produits</span>
+            </a>
+            <a href="/orders" class="nav-link {% if request.endpoint == 'orders_page' %}active{% endif %}">
+                <span class="nav-icon">🧾</span>
+                <span>Commandes</span>
+            </a>
+            <a href="/aggregation" class="nav-link {% if request.endpoint == 'aggregation_page' %}active{% endif %}">
+                <span class="nav-icon">📈</span>
+                <span>Statistiques</span>
+            </a>
+            <a href="/search" class="nav-link {% if request.endpoint == 'search_page' %}active{% endif %}">
+                <span class="nav-icon">🔍</span>
+                <span>Recherche</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="db-status">
+                <span class="status-dot"></span>
+                <span>MongoDB Connected</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="top-header">
+            <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+            <div class="header-actions">
+                {% block header_actions %}{% endblock %}
+            </div>
+        </header>
+        
+        <!-- Toast Notifications -->
+        <div id="toast-container"></div>
+        
+        <div class="content-area">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}Recherche Avancée - BoutiqueComplete1{% endblock %}
+{% block page_title %}Test des Opérateurs MongoDB{% endblock %}
+
+{% block content %}
+<div class="search-layout">
+    <div class="card full-width">
+        <div class="card-header">
+            <h2>🔍 Tests des Opérateurs</h2>
+        </div>
+        <div class="card-body">
+            <p class="info-text">
+                Cette page permet de tester individuellement les opérateurs MongoDB via l'API.
+            </p>
+
+            <div class="operators-grid">
+                <!-- $gt Operator -->
+                <div class="operator-card">
+                    <div class="op-header">
+                        <h3>$gt (Plus grand que)</h3>
+                        <span class="badge">$gt</span>
+                    </div>
+                    <div class="op-body">
+                        <label>Prix supérieur à:</label>
+                        <div class="input-group">
+                            <input type="number" id="gt-value" value="50">
+                            <button class="btn btn-sm btn-primary" onclick="testOperator('$gt')">Tester</button>
+                        </div>
+                        <div class="op-query"><code>{"prix": {"$gt": <span id="gt-display">50</span>}}</code></div>
+                    </div>
+                </div>
+
+                <!-- $gte Operator -->
+                <div class="operator-card">
+                    <div class="op-header">
+                        <h3>$gte (Supérieur ou égal)</h3>
+                        <span class="badge">$gte</span>
+                    </div>
+                    <div class="op-body">
+                        <label>Stock supérieur ou égal à:</label>
+                        <div class="input-group">
+                            <input type="number" id="gte-value" value="20">
+                            <button class="btn btn-sm btn-primary" onclick="testOperator('$gte')">Tester</button>
+                        </div>
+                        <div class="op-query"><code>{"stock": {"$gte": <span id="gte-display">20</span>}}</code></div>
+                    </div>
+                </div>
+
+                <!-- $regex Operator -->
+                <div class="operator-card">
+                    <div class="op-header">
+                        <h3>$regex (Expression Régulière)</h3>
+                        <span class="badge">$regex</span>
+                    </div>
+                    <div class="op-body">
+                        <label>Nom commence par:</label>
+                        <div class="input-group">
+                            <input type="text" id="regex-value" value="^Ch">
+                            <button class="btn btn-sm btn-primary" onclick="testOperator('$regex')">Tester</button>
+                        </div>
+                        <div class="op-query">
+                            <code>{"nom": {"$regex": "<span id="regex-display">^Ch</span>", "$options": "i"}}</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- $in Operator -->
+                <div class="operator-card">
+                    <div class="op-header">
+                        <h3>$in (Dans la liste)</h3>
+                        <span class="badge">$in</span>
+                    </div>
+                    <div class="op-body">
+                        <label>Catégories:</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" class="in-check" value="Vêtements" checked> Vêtements</label>
+                            <label><input type="checkbox" class="in-check" value="Chaussures"> Chaussures</label>
+                            <label><input type="checkbox" class="in-check" value="Accessoires" checked>
+                                Accessoires</label>
+                        </div>
+                        <button class="btn btn-sm btn-primary" onclick="testOperator('$in')">Tester</button>
+                    </div>
+                </div>
+
+                <!-- $or Operator -->
+                <div class="operator-card">
+                    <div class="op-header">
+                        <h3>$or (OU logique)</h3>
+                        <span class="badge">$or</span>
+                    </div>
+                    <div class="op-body">
+                        <p>Catégorie = Chaussures <br><strong>OU</strong><br> Prix < 50€</p>
+                                <button class="btn btn-sm btn-primary" onclick="testOperator('$or')">Tester</button>
+                    </div>
+                </div>
+
+                <!-- $where Operator -->
+                <div class="operator-card">
+                    <div class="op-header">
+                        <h3>$where (JavaScript)</h3>
+                        <span class="badge">$where</span>
+                    </div>
+                    <div class="op-body">
+                        <label>Expression JS:</label>
+                        <input type="text" id="where-value" value="this.prix * this.stock > 2000" disabled
+                            class="code-input">
+                        <p class="tiny-text">Produits dont la valeur du stock > 2000</p>
+                        <button class="btn btn-sm btn-primary" onclick="testOperator('$where')">Tester</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Area -->
+    <div class="card full-width results-card">
+        <div class="card-header">
+            <h2>📋 Résultats</h2>
+            <span id="results-count" class="badge-count">0 résultats</span>
+        </div>
+        <div class="card-body">
+            <div class="query-preview" id="query-preview">
+                Requête: <span class="placeholder">En attente d'un test...</span>
+            </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Catégorie</th>
+                            <th>Prix</th>
+                            <th>Stock</th>
+                            <th>Détails</th>
+                        </tr>
+                    </thead>
+                    <tbody id="results-body">
+                        <tr>
+                            <td colspan="5" class="empty">Lancez un test pour voir les résultats</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function testOperator(operator) {
+        const tbody = document.getElementById('results-body');
+        const countBadge = document.getElementById('results-count');
+        const queryPreview = document.getElementById('query-preview');
+
+        tbody.innerHTML = '<tr><td colspan="5" class="loading">Chargement...</td></tr>';
+
+        let params = {};
+
+        // Prepare params based on operator
+        if (operator === '$gt') {
+            const val = parseFloat(document.getElementById('gt-value').value);
+            params = { field: 'prix', value: val };
+            document.getElementById('gt-display').textContent = val;
+        }
+        else if (operator === '$gte') {
+            const val = parseFloat(document.getElementById('gte-value').value);
+            params = { field: 'stock', value: val };
+            document.getElementById('gte-display').textContent = val;
+        }
+        else if (operator === '$regex') {
+            const val = document.getElementById('regex-value').value;
+            params = { field: 'nom', pattern: val, options: 'i' };
+            document.getElementById('regex-display').textContent = val;
+        }
+        else if (operator === '$in') {
+            const checked = Array.from(document.querySelectorAll('.in-check:checked')).map(cb => cb.value);
+            params = { field: 'categorie', values: checked };
+        }
+        else if (operator === '$or') {
+            params = { conditions: [{ categorie: 'Chaussures' }, { prix: { '$lt': 50 } }] };
+        }
+        else if (operator === '$where') {
+            params = { expression: 'this.prix * this.stock > 2000' };
+        }
+
+        try {
+            const response = await api.post('/api/demo/operators', {
+                operator: operator,
+                params: params
+            });
+
+            // Show actual query used
+            queryPreview.innerHTML = `Requête MongoDB: <code>${JSON.stringify(response.query)}</code>`;
+
+            const data = response.data || [];
+            countBadge.textContent = `${response.count} résultats`;
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty">Aucun résultat trouvé</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(p => `
+            <tr>
+                <td><strong>${p.nom}</strong></td>
+                <td><span class="badge">${p.categorie}</span></td>
+                <td>${formatCurrency(p.prix)}</td>
+                <td>${p.stock}</td>
+                <td><small>${p.tags ? 'Tags: ' + p.tags.join(', ') : '-'}</small></td>
+            </tr>
+        `).join('');
+
+        } catch (error) {
+            tbody.innerHTML = '<tr><td colspan="5" class="error">Erreur lors de la requête</td></tr>';
+            console.error(error);
+        }
+    }
+</script>
+{% endblock %}

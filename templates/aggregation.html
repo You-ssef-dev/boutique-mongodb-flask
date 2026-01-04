@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Statistiques - BoutiqueComplete1{% endblock %}
+{% block page_title %}Statistiques & Agrégation{% endblock %}
+
+{% block content %}
+<div class="stats-layout">
+    <div class="card">
+        <div class="card-header">
+            <h2>📊 Valeur du Stock par Catégorie</h2>
+            <span class="badge">$group + $sum</span>
+        </div>
+        <div class="card-body">
+            <p class="info-text">Agrégation: $group, $sum, $avg</p>
+            <div id="stock-by-category" class="stats-grid">
+                <div class="loading-spinner">Chargement...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>💰 Résumé des Ventes</h2>
+        </div>
+        <div class="card-body">
+            <div id="sales-summary" class="stats-summary">
+                <div class="loading-spinner">Chargement...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>🏆 Top Produits</h2>
+        </div>
+        <div class="card-body">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Produit</th>
+                        <th>Qté</th>
+                        <th>Revenue</th>
+                    </tr>
+                </thead>
+                <tbody id="top-products">
+                    <tr>
+                        <td colspan="4">Chargement...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>🔑 Index MongoDB</h2>
+            <button class="btn btn-sm btn-secondary" onclick="createNewIndex()">+ Index</button>
+        </div>
+        <div class="card-body">
+            <div id="indexes-list" class="indexes-grid">
+                <div class="loading-spinner">Chargement...</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        await loadStockByCategory();
+        await loadSalesSummary();
+        await loadTopProducts();
+        await loadIndexes();
+    });
+
+    async function loadStockByCategory() {
+        const container = document.getElementById('stock-by-category');
+        try {
+            const response = await api.get('/api/stats/stock-by-category');
+            const data = response.data || [];
+            container.innerHTML = data.map(cat => `
+            <div class="stat-card-large">
+                <h3>${cat._id}</h3>
+                <div class="stat-details">
+                    <div class="stat-row"><span>Produits</span><span>${cat.nombre_produits}</span></div>
+                    <div class="stat-row"><span>Stock</span><span>${cat.stock_total}</span></div>
+                    <div class="stat-row highlight"><span>Valeur</span><span>${formatCurrency(cat.valeur_stock)}</span></div>
+                </div>
+            </div>
+        `).join('') || '<div>Aucune donnée</div>';
+        } catch (error) { container.innerHTML = '<div class="error-message">Erreur</div>'; }
+    }
+
+    async function loadSalesSummary() {
+        const container = document.getElementById('sales-summary');
+        try {
+            const response = await api.get('/api/stats/sales-by-category');
+            const embedded = response.data?.embedded_orders?.[0];
+            container.innerHTML = `
+            <div class="summary-cards">
+                <div class="summary-card"><div class="summary-value">${embedded ? formatCurrency(embedded.total_ventes) : '0 €'}</div><div>Total Ventes</div></div>
+                <div class="summary-card"><div class="summary-value">${embedded?.nombre_articles || 0}</div><div>Articles Vendus</div></div>
+            </div>`;
+        } catch (error) { container.innerHTML = '<div class="error-message">Erreur</div>'; }
+    }
+
+    async function loadTopProducts() {
+        const tbody = document.getElementById('top-products');
+        try {
+            const response = await api.get('/api/stats/top-products');
+            tbody.innerHTML = (response.data || []).map((p, i) =>
+                `<tr><td>${i + 1}</td><td>${p._id}</td><td>${p.quantite_vendue}</td><td>${formatCurrency(p.revenue)}</td></tr>`
+            ).join('') || '<tr><td colspan="4">Aucune vente</td></tr>';
+        } catch (error) { tbody.innerHTML = '<tr><td colspan="4">Erreur</td></tr>'; }
+    }
+
+    async function loadIndexes() {
+        const container = document.getElementById('indexes-list');
+        try {
+            const response = await api.get('/api/indexes');
+            container.innerHTML = (response.data || []).map(idx =>
+                `<div class="index-card"><div class="index-name">${idx.name}</div><code>${JSON.stringify(idx.key)}</code></div>`
+            ).join('');
+        } catch (error) { container.innerHTML = '<div class="error-message">Erreur</div>'; }
+    }
+
+    async function createNewIndex() {
+        const field = prompt('Champ pour l\'index:', 'prix');
+        if (!field) return;
+        try {
+            await api.post('/api/indexes', { field });
+            showToast('Index créé', 'success');
+            loadIndexes();
+        } catch (error) { showToast('Erreur', 'error'); }
+    }
+</script>
+{% endblock %}

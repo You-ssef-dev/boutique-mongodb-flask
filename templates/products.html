@@ -1,0 +1,416 @@
+{% extends "base.html" %}
+
+{% block title %}Produits - BoutiqueComplete1{% endblock %}
+{% block page_title %}Gestion des Produits{% endblock %}
+
+{% block header_actions %}
+<button class="btn btn-primary" onclick="openModal('add-product-modal')">
+    <span>➕</span> Nouveau Produit
+</button>
+{% endblock %}
+
+{% block content %}
+<div class="page-layout">
+    <!-- Filters Panel -->
+    <div class="filters-panel card">
+        <div class="card-header">
+            <h3>🔍 Filtres</h3>
+            <button class="btn btn-sm btn-ghost" onclick="resetFilters()">Réinitialiser</button>
+        </div>
+        <div class="card-body">
+            <div class="filter-group">
+                <label>Recherche</label>
+                <input type="text" id="filter-search" placeholder="Nom du produit..." oninput="applyFilters()">
+            </div>
+            <div class="filter-group">
+                <label>Catégorie</label>
+                <select id="filter-category" onchange="applyFilters()">
+                    <option value="">Toutes</option>
+                    <option value="Vêtements">Vêtements</option>
+                    <option value="Chaussures">Chaussures</option>
+                    <option value="Accessoires">Accessoires</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Prix min (€)</label>
+                <input type="number" id="filter-min-price" placeholder="0" oninput="applyFilters()">
+            </div>
+            <div class="filter-group">
+                <label>Prix max (€)</label>
+                <input type="number" id="filter-max-price" placeholder="999" oninput="applyFilters()">
+            </div>
+            <div class="filter-group">
+                <label>Stock minimum</label>
+                <input type="number" id="filter-min-stock" placeholder="0" oninput="applyFilters()">
+            </div>
+            <div class="filter-group">
+                <label>Trier par</label>
+                <select id="filter-sort" onchange="applyFilters()">
+                    <option value="nom">Nom (A-Z)</option>
+                    <option value="-nom">Nom (Z-A)</option>
+                    <option value="prix">Prix (croissant)</option>
+                    <option value="-prix">Prix (décroissant)</option>
+                    <option value="-stock">Stock (décroissant)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="main-panel">
+        <div class="results-header">
+            <span id="results-count">0 produits</span>
+            <div class="pagination" id="pagination"></div>
+        </div>
+        <div class="products-grid" id="products-container">
+            <div class="loading-spinner">Chargement...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Product Modal -->
+<div class="modal" id="add-product-modal">
+    <div class="modal-overlay" onclick="closeModal('add-product-modal')"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>➕ Nouveau Produit</h2>
+            <button class="modal-close" onclick="closeModal('add-product-modal')">×</button>
+        </div>
+        <form id="add-product-form" onsubmit="handleAddProduct(event)">
+            <div class="form-group">
+                <label for="add-nom">Nom du produit *</label>
+                <input type="text" id="add-nom" name="nom" required>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="add-prix">Prix (€) *</label>
+                    <input type="number" id="add-prix" name="prix" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="add-stock">Stock *</label>
+                    <input type="number" id="add-stock" name="stock" min="0" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="add-categorie">Catégorie *</label>
+                <select id="add-categorie" name="categorie" required>
+                    <option value="Vêtements">Vêtements</option>
+                    <option value="Chaussures">Chaussures</option>
+                    <option value="Accessoires">Accessoires</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="add-tags">Tags (séparés par virgule)</label>
+                <input type="text" id="add-tags" name="tags" placeholder="mode, casual, premium">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" onclick="closeModal('add-product-modal')">Annuler</button>
+                <button type="submit" class="btn btn-primary">Créer le produit</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Product Modal -->
+<div class="modal" id="edit-product-modal">
+    <div class="modal-overlay" onclick="closeModal('edit-product-modal')"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>✏️ Modifier le Produit</h2>
+            <button class="modal-close" onclick="closeModal('edit-product-modal')">×</button>
+        </div>
+        <form id="edit-product-form" onsubmit="handleEditProduct(event)">
+            <input type="hidden" id="edit-id" name="id">
+            <div class="form-group">
+                <label for="edit-nom">Nom du produit *</label>
+                <input type="text" id="edit-nom" name="nom" required>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="edit-prix">Prix (€) *</label>
+                    <input type="number" id="edit-prix" name="prix" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-stock">Stock *</label>
+                    <input type="number" id="edit-stock" name="stock" min="0" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="edit-categorie">Catégorie *</label>
+                <select id="edit-categorie" name="categorie" required>
+                    <option value="Vêtements">Vêtements</option>
+                    <option value="Chaussures">Chaussures</option>
+                    <option value="Accessoires">Accessoires</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Tags actuels</label>
+                <div id="edit-tags-container" class="tags-container"></div>
+                <div class="tag-input-row">
+                    <input type="text" id="edit-new-tag" placeholder="Ajouter un tag...">
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="addTagToProduct()">Ajouter</button>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" onclick="closeModal('edit-product-modal')">Annuler</button>
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let currentProducts = [];
+    let currentPage = 0;
+    const pageSize = 12;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadProducts();
+    });
+
+    async function loadProducts() {
+        const container = document.getElementById('products-container');
+        container.innerHTML = '<div class="loading-spinner">Chargement...</div>';
+
+        try {
+            const params = buildFilterParams();
+            const response = await api.get('/api/products' + params);
+
+            currentProducts = response.data || [];
+            renderProducts();
+            updateResultsCount(response.total || 0);
+        } catch (error) {
+            container.innerHTML = '<div class="error-message">Erreur de chargement</div>';
+            showToast('Erreur lors du chargement des produits', 'error');
+        }
+    }
+
+    function buildFilterParams() {
+        const params = new URLSearchParams();
+
+        const search = document.getElementById('filter-search').value;
+        const category = document.getElementById('filter-category').value;
+        const minPrice = document.getElementById('filter-min-price').value;
+        const maxPrice = document.getElementById('filter-max-price').value;
+        const minStock = document.getElementById('filter-min-stock').value;
+        const sort = document.getElementById('filter-sort').value;
+
+        if (search) params.append('search', search);
+        if (category) params.append('categorie', category);
+        if (minPrice) params.append('min_prix', minPrice);
+        if (maxPrice) params.append('max_prix', maxPrice);
+        if (minStock) params.append('min_stock', minStock);
+        if (sort) params.append('sort', sort);
+
+        params.append('skip', currentPage * pageSize);
+        params.append('limit', pageSize);
+
+        return '?' + params.toString();
+    }
+
+    function renderProducts() {
+        const container = document.getElementById('products-container');
+
+        if (currentProducts.length === 0) {
+            container.innerHTML = '<div class="empty-state"><span>📦</span><p>Aucun produit trouvé</p></div>';
+            return;
+        }
+
+        container.innerHTML = currentProducts.map(product => `
+        <div class="product-card">
+            <div class="product-header">
+                <span class="product-category">${product.categorie}</span>
+                <div class="product-actions-dropdown">
+                    <button class="btn-icon" onclick="toggleDropdown(event, '${product._id}')">⋮</button>
+                    <div class="dropdown-menu" id="dropdown-${product._id}">
+                        <button onclick="editProduct('${product._id}')">✏️ Modifier</button>
+                        <button onclick="deleteProduct('${product._id}')" class="danger">🗑️ Supprimer</button>
+                    </div>
+                </div>
+            </div>
+            <div class="product-body">
+                <h3 class="product-name">${product.nom}</h3>
+                <div class="product-price">${formatCurrency(product.prix)}</div>
+                <div class="product-stock ${product.stock < 20 ? 'low' : ''}">
+                    <span class="stock-indicator"></span>
+                    ${product.stock} en stock
+                </div>
+                ${product.tags && product.tags.length > 0 ? `
+                    <div class="product-tags">
+                        ${product.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    </div>
+                ` : ''}
+            </div>
+            <div class="product-footer">
+                <button class="btn btn-sm btn-secondary" onclick="editProduct('${product._id}')">Modifier</button>
+            </div>
+        </div>
+    `).join('');
+    }
+
+    function updateResultsCount(total) {
+        document.getElementById('results-count').textContent = `${total} produit${total > 1 ? 's' : ''}`;
+    }
+
+    let filterTimeout;
+    function applyFilters() {
+        clearTimeout(filterTimeout);
+        filterTimeout = setTimeout(() => {
+            currentPage = 0;
+            loadProducts();
+        }, 300);
+    }
+
+    function resetFilters() {
+        document.getElementById('filter-search').value = '';
+        document.getElementById('filter-category').value = '';
+        document.getElementById('filter-min-price').value = '';
+        document.getElementById('filter-max-price').value = '';
+        document.getElementById('filter-min-stock').value = '';
+        document.getElementById('filter-sort').value = 'nom';
+        currentPage = 0;
+        loadProducts();
+    }
+
+    async function handleAddProduct(event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const tagsInput = document.getElementById('add-tags').value;
+        const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [];
+
+        const productData = {
+            nom: form.nom.value,
+            prix: parseFloat(form.prix.value),
+            stock: parseInt(form.stock.value),
+            categorie: form.categorie.value,
+            tags: tags
+        };
+
+        try {
+            await api.post('/api/products', productData);
+            showToast('Produit créé avec succès!', 'success');
+            closeModal('add-product-modal');
+            form.reset();
+            loadProducts();
+        } catch (error) {
+            showToast('Erreur lors de la création', 'error');
+        }
+    }
+
+    let editingProductId = null;
+    let editingProductTags = [];
+
+    async function editProduct(productId) {
+        try {
+            const response = await api.get(`/api/products/${productId}`);
+            const product = response.data;
+
+            editingProductId = productId;
+            editingProductTags = product.tags || [];
+
+            document.getElementById('edit-id').value = productId;
+            document.getElementById('edit-nom').value = product.nom;
+            document.getElementById('edit-prix').value = product.prix;
+            document.getElementById('edit-stock').value = product.stock;
+            document.getElementById('edit-categorie').value = product.categorie;
+
+            renderEditTags();
+            openModal('edit-product-modal');
+        } catch (error) {
+            showToast('Erreur lors du chargement', 'error');
+        }
+    }
+
+    function renderEditTags() {
+        const container = document.getElementById('edit-tags-container');
+        if (editingProductTags.length === 0) {
+            container.innerHTML = '<span class="no-tags">Aucun tag</span>';
+            return;
+        }
+        container.innerHTML = editingProductTags.map(tag => `
+        <span class="tag editable">
+            ${tag}
+            <button type="button" onclick="removeTagFromProduct('${tag}')">×</button>
+        </span>
+    `).join('');
+    }
+
+    async function addTagToProduct() {
+        const input = document.getElementById('edit-new-tag');
+        const tag = input.value.trim();
+
+        if (!tag || !editingProductId) return;
+
+        try {
+            await api.post(`/api/products/${editingProductId}/tags`, { tag: tag, unique: true });
+            editingProductTags.push(tag);
+            renderEditTags();
+            input.value = '';
+            showToast('Tag ajouté ($addToSet)', 'success');
+        } catch (error) {
+            showToast('Erreur', 'error');
+        }
+    }
+
+    async function removeTagFromProduct(tag) {
+        if (!editingProductId) return;
+
+        try {
+            await api.delete(`/api/products/${editingProductId}/tags`, { tag: tag });
+            editingProductTags = editingProductTags.filter(t => t !== tag);
+            renderEditTags();
+            showToast('Tag supprimé ($pull)', 'success');
+        } catch (error) {
+            showToast('Erreur', 'error');
+        }
+    }
+
+    async function handleEditProduct(event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const productId = document.getElementById('edit-id').value;
+
+        const productData = {
+            nom: form.nom.value,
+            prix: parseFloat(form.prix.value),
+            stock: parseInt(form.stock.value),
+            categorie: form.categorie.value
+        };
+
+        try {
+            await api.put(`/api/products/${productId}`, productData);
+            showToast('Produit mis à jour ($set, $currentDate)', 'success');
+            closeModal('edit-product-modal');
+            loadProducts();
+        } catch (error) {
+            showToast('Erreur lors de la mise à jour', 'error');
+        }
+    }
+
+    async function deleteProduct(productId) {
+        if (!confirm('Êtes-vous sûr de vouloir supprimer ce produit?')) return;
+
+        try {
+            await api.delete(`/api/products/${productId}`);
+            showToast('Produit supprimé', 'success');
+            loadProducts();
+        } catch (error) {
+            showToast('Erreur lors de la suppression', 'error');
+        }
+    }
+
+    function toggleDropdown(event, productId) {
+        event.stopPropagation();
+        document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('show'));
+        document.getElementById(`dropdown-${productId}`).classList.toggle('show');
+    }
+
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('show'));
+    });
+</script>
+{% endblock %}

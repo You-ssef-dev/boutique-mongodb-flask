@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - BoutiqueComplete1{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-grid">
+    <!-- Stats Cards -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-icon products">📦</div>
+            <div class="stat-info">
+                <span class="stat-value" id="total-products">-</span>
+                <span class="stat-label">Produits</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon orders">🧾</div>
+            <div class="stat-info">
+                <span class="stat-value" id="total-orders">-</span>
+                <span class="stat-label">Commandes</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon stock">📊</div>
+            <div class="stat-info">
+                <span class="stat-value" id="total-stock">-</span>
+                <span class="stat-label">Stock Total</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon value">💰</div>
+            <div class="stat-info">
+                <span class="stat-value" id="total-value">-</span>
+                <span class="stat-label">Valeur Stock</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card">
+        <div class="card-header">
+            <h2>Actions Rapides</h2>
+        </div>
+        <div class="card-body">
+            <div class="quick-actions">
+                <a href="/products" class="action-btn primary">
+                    <span class="action-icon">➕</span>
+                    <span>Ajouter Produit</span>
+                </a>
+                <a href="/orders" class="action-btn secondary">
+                    <span class="action-icon">📝</span>
+                    <span>Nouvelle Commande</span>
+                </a>
+                <a href="/search" class="action-btn tertiary">
+                    <span class="action-icon">🔍</span>
+                    <span>Rechercher</span>
+                </a>
+                <a href="/aggregation" class="action-btn quaternary">
+                    <span class="action-icon">📈</span>
+                    <span>Voir Stats</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Products -->
+    <div class="card">
+        <div class="card-header">
+            <h2>Produits Récents</h2>
+            <a href="/products" class="link-btn">Voir tout →</a>
+        </div>
+        <div class="card-body">
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Catégorie</th>
+                            <th>Prix</th>
+                            <th>Stock</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recent-products">
+                        <tr>
+                            <td colspan="4" class="loading">Chargement...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Categories Overview -->
+    <div class="card">
+        <div class="card-header">
+            <h2>Catégories</h2>
+        </div>
+        <div class="card-body">
+            <div id="categories-list" class="categories-grid">
+                <div class="loading">Chargement...</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        await loadDashboardStats();
+        await loadRecentProducts();
+        await loadCategories();
+    });
+
+    async function loadDashboardStats() {
+        try {
+            const products = await api.get('/api/products');
+            const stockStats = await api.get('/api/stats/stock-by-category');
+
+            document.getElementById('total-products').textContent = products.total || 0;
+
+            // Calculate totals
+            let totalStock = 0;
+            let totalValue = 0;
+            if (stockStats.data) {
+                stockStats.data.forEach(cat => {
+                    totalStock += cat.stock_total || 0;
+                    totalValue += cat.valeur_stock || 0;
+                });
+            }
+
+            document.getElementById('total-stock').textContent = totalStock;
+            document.getElementById('total-value').textContent = formatCurrency(totalValue);
+
+            // Get orders count
+            const embeddedOrders = await api.get('/api/orders/embedding');
+            const linkedOrders = await api.get('/api/orders/linking');
+            const totalOrders = (embeddedOrders.data?.length || 0) + (linkedOrders.data?.length || 0);
+            document.getElementById('total-orders').textContent = totalOrders;
+
+        } catch (error) {
+            console.error('Error loading stats:', error);
+        }
+    }
+
+    async function loadRecentProducts() {
+        try {
+            const response = await api.get('/api/products?limit=5&sort=-_id');
+            const tbody = document.getElementById('recent-products');
+
+            if (response.data && response.data.length > 0) {
+                tbody.innerHTML = response.data.map(product => `
+                <tr>
+                    <td><strong>${product.nom}</strong></td>
+                    <td><span class="badge">${product.categorie}</span></td>
+                    <td>${formatCurrency(product.prix)}</td>
+                    <td><span class="stock-badge ${product.stock < 20 ? 'low' : ''}">${product.stock}</span></td>
+                </tr>
+            `).join('');
+            } else {
+                tbody.innerHTML = '<tr><td colspan="4" class="empty">Aucun produit</td></tr>';
+            }
+        } catch (error) {
+            console.error('Error loading products:', error);
+        }
+    }
+
+    async function loadCategories() {
+        try {
+            const response = await api.get('/api/stats/stock-by-category');
+            const container = document.getElementById('categories-list');
+
+            if (response.data && response.data.length > 0) {
+                container.innerHTML = response.data.map(cat => `
+                <div class="category-card">
+                    <h3>${cat._id}</h3>
+                    <div class="category-stats">
+                        <div class="category-stat">
+                            <span class="value">${cat.nombre_produits}</span>
+                            <span class="label">Produits</span>
+                        </div>
+                        <div class="category-stat">
+                            <span class="value">${cat.stock_total}</span>
+                            <span class="label">Stock</span>
+                        </div>
+                        <div class="category-stat">
+                            <span class="value">${formatCurrency(cat.valeur_stock)}</span>
+                            <span class="label">Valeur</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            } else {
+                container.innerHTML = '<div class="empty">Aucune catégorie</div>';
+            }
+        } catch (error) {
+            console.error('Error loading categories:', error);
+        }
+    }
+</script>
+{% endblock %}

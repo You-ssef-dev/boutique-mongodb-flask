@@ -1,0 +1,468 @@
+{% extends "base.html" %}
+
+{% block title %}Commandes - BoutiqueComplete1{% endblock %}
+{% block page_title %}Gestion des Commandes{% endblock %}
+
+{% block content %}
+<div class="orders-layout">
+    <!-- Embedding Orders Section -->
+    <div class="card orders-section">
+        <div class="card-header">
+            <h2>📦 Commandes (Embedding)</h2>
+            <button class="btn btn-primary btn-sm" onclick="openModal('add-embedding-modal')">
+                + Nouvelle Commande
+            </button>
+        </div>
+        <div class="card-body">
+            <p class="info-text">
+                <strong>Embedding:</strong> Les produits sont stockés directement dans le document commande.
+            </p>
+            <div id="embedding-orders" class="orders-list">
+                <div class="loading-spinner">Chargement...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Linking Orders Section -->
+    <div class="card orders-section">
+        <div class="card-header">
+            <h2>🔗 Commandes (Linking)</h2>
+            <button class="btn btn-primary btn-sm" onclick="openModal('add-linking-modal')">
+                + Nouvelle Commande
+            </button>
+        </div>
+        <div class="card-body">
+            <p class="info-text">
+                <strong>Linking:</strong> Références aux produits via leur _id (utilise $lookup pour résoudre).
+            </p>
+            <div id="linking-orders" class="orders-list">
+                <div class="loading-spinner">Chargement...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Embedding Order Modal -->
+<div class="modal" id="add-embedding-modal">
+    <div class="modal-overlay" onclick="closeModal('add-embedding-modal')"></div>
+    <div class="modal-content modal-lg">
+        <div class="modal-header">
+            <h2>📦 Nouvelle Commande (Embedding)</h2>
+            <button class="modal-close" onclick="closeModal('add-embedding-modal')">×</button>
+        </div>
+        <form id="add-embedding-form" onsubmit="handleAddEmbeddingOrder(event)">
+            <div class="form-group">
+                <label>Nom du client *</label>
+                <input type="text" id="embed-client" required placeholder="Ex: Dupont Marie">
+            </div>
+            <div class="form-group">
+                <label>Statut</label>
+                <select id="embed-statut">
+                    <option value="En cours">En cours</option>
+                    <option value="En préparation">En préparation</option>
+                    <option value="Livrée">Livrée</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Produits</label>
+                <div id="embed-products-list" class="selected-products"></div>
+                <div class="product-selector">
+                    <select id="embed-product-select">
+                        <option value="">Sélectionner un produit...</option>
+                    </select>
+                    <input type="number" id="embed-product-qty" min="1" value="1" placeholder="Qté">
+                    <button type="button" class="btn btn-secondary" onclick="addProductToEmbedding()">Ajouter</button>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" onclick="closeModal('add-embedding-modal')">Annuler</button>
+                <button type="submit" class="btn btn-primary">Créer la commande</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Add Linking Order Modal -->
+<div class="modal" id="add-linking-modal">
+    <div class="modal-overlay" onclick="closeModal('add-linking-modal')"></div>
+    <div class="modal-content modal-lg">
+        <div class="modal-header">
+            <h2>🔗 Nouvelle Commande (Linking)</h2>
+            <button class="modal-close" onclick="closeModal('add-linking-modal')">×</button>
+        </div>
+        <form id="add-linking-form" onsubmit="handleAddLinkingOrder(event)">
+            <div class="form-group">
+                <label>Client *</label>
+                <select id="link-client" required>
+                    <option value="">Sélectionner un client...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Statut</label>
+                <select id="link-statut">
+                    <option value="En cours">En cours</option>
+                    <option value="En préparation">En préparation</option>
+                    <option value="Livrée">Livrée</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Produits (références)</label>
+                <div id="link-products-list" class="selected-products"></div>
+                <div class="product-selector">
+                    <select id="link-product-select">
+                        <option value="">Sélectionner un produit...</option>
+                    </select>
+                    <input type="number" id="link-product-qty" min="1" value="1" placeholder="Qté">
+                    <button type="button" class="btn btn-secondary" onclick="addProductToLinking()">Ajouter</button>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" onclick="closeModal('add-linking-modal')">Annuler</button>
+                <button type="submit" class="btn btn-primary">Créer la commande</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Order Details Modal -->
+<div class="modal" id="order-details-modal">
+    <div class="modal-overlay" onclick="closeModal('order-details-modal')"></div>
+    <div class="modal-content modal-lg">
+        <div class="modal-header">
+            <h2 id="order-details-title">Détails de la Commande</h2>
+            <button class="modal-close" onclick="closeModal('order-details-modal')">×</button>
+        </div>
+        <div id="order-details-content" class="modal-body-scroll"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let allProducts = [];
+    let allClients = [];
+    let embeddingOrderProducts = [];
+    let linkingOrderProducts = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        await loadAllProducts();
+        await loadAllClients();
+        await loadEmbeddingOrders();
+        await loadLinkingOrders();
+        populateProductSelects();
+        populateClientSelect();
+    });
+
+    async function loadAllProducts() {
+        try {
+            const response = await api.get('/api/products?limit=100');
+            allProducts = response.data || [];
+        } catch (error) {
+            console.error('Error loading products:', error);
+        }
+    }
+
+    async function loadAllClients() {
+        try {
+            const response = await api.get('/api/clients');
+            allClients = response.data || [];
+        } catch (error) {
+            console.error('Error loading clients:', error);
+        }
+    }
+
+    function populateProductSelects() {
+        const options = allProducts.map(p =>
+            `<option value="${p._id}" data-nom="${p.nom}" data-prix="${p.prix}">${p.nom} - ${formatCurrency(p.prix)}</option>`
+        ).join('');
+
+        document.getElementById('embed-product-select').innerHTML = '<option value="">Sélectionner...</option>' + options;
+        document.getElementById('link-product-select').innerHTML = '<option value="">Sélectionner...</option>' + options;
+    }
+
+    function populateClientSelect() {
+        const options = allClients.map(c =>
+            `<option value="${c._id}">${c.prenom} ${c.nom} - ${c.ville}</option>`
+        ).join('');
+
+        document.getElementById('link-client').innerHTML = '<option value="">Sélectionner...</option>' + options;
+    }
+
+    // =====================
+    // EMBEDDING ORDERS
+    // =====================
+
+    async function loadEmbeddingOrders() {
+        const container = document.getElementById('embedding-orders');
+        try {
+            const response = await api.get('/api/orders/embedding');
+            const orders = response.data || [];
+
+            if (orders.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>Aucune commande (embedding)</p></div>';
+                return;
+            }
+
+            container.innerHTML = orders.map(order => `
+            <div class="order-card">
+                <div class="order-header">
+                    <div class="order-id">#${order._id.substring(0, 8)}...</div>
+                    <span class="order-status status-${order.statut.toLowerCase().replace(' ', '-')}">${order.statut}</span>
+                </div>
+                <div class="order-body">
+                    <div class="order-client">👤 ${order.client_nom}</div>
+                    <div class="order-date">📅 ${formatDate(order.date_commande)}</div>
+                    <div class="order-products">
+                        ${order.produits.map(p => `
+                            <div class="order-product-item">
+                                <span>${p.nom} × ${p.quantite}</span>
+                                <span>${formatCurrency(p.prix * p.quantite)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="order-total">Total: ${formatCurrency(order.total)}</div>
+                </div>
+                <div class="order-actions">
+                    <button class="btn btn-sm btn-secondary" onclick="viewEmbeddingOrder('${order._id}')">Détails</button>
+                    <button class="btn btn-sm btn-ghost" onclick="addProductToEmbeddingOrder('${order._id}')">+ Produit</button>
+                </div>
+            </div>
+        `).join('');
+
+        } catch (error) {
+            container.innerHTML = '<div class="error-message">Erreur de chargement</div>';
+        }
+    }
+
+    function addProductToEmbedding() {
+        const select = document.getElementById('embed-product-select');
+        const qty = parseInt(document.getElementById('embed-product-qty').value) || 1;
+        const option = select.options[select.selectedIndex];
+
+        if (!select.value) return;
+
+        const product = {
+            nom: option.dataset.nom,
+            prix: parseFloat(option.dataset.prix),
+            quantite: qty
+        };
+
+        embeddingOrderProducts.push(product);
+        renderEmbeddingSelectedProducts();
+        select.value = '';
+        document.getElementById('embed-product-qty').value = 1;
+    }
+
+    function renderEmbeddingSelectedProducts() {
+        const container = document.getElementById('embed-products-list');
+        if (embeddingOrderProducts.length === 0) {
+            container.innerHTML = '<div class="empty-text">Aucun produit ajouté</div>';
+            return;
+        }
+
+        container.innerHTML = embeddingOrderProducts.map((p, idx) => `
+        <div class="selected-product-item">
+            <span>${p.nom} × ${p.quantite}</span>
+            <span>${formatCurrency(p.prix * p.quantite)}</span>
+            <button type="button" class="btn-remove" onclick="removeEmbeddingProduct(${idx})">×</button>
+        </div>
+    `).join('');
+    }
+
+    function removeEmbeddingProduct(index) {
+        embeddingOrderProducts.splice(index, 1);
+        renderEmbeddingSelectedProducts();
+    }
+
+    async function handleAddEmbeddingOrder(event) {
+        event.preventDefault();
+
+        if (embeddingOrderProducts.length === 0) {
+            showToast('Ajoutez au moins un produit', 'error');
+            return;
+        }
+
+        const orderData = {
+            client_nom: document.getElementById('embed-client').value,
+            statut: document.getElementById('embed-statut').value,
+            produits: embeddingOrderProducts
+        };
+
+        try {
+            await api.post('/api/orders/embedding', orderData);
+            showToast('Commande (embedding) créée!', 'success');
+            closeModal('add-embedding-modal');
+            embeddingOrderProducts = [];
+            renderEmbeddingSelectedProducts();
+            document.getElementById('add-embedding-form').reset();
+            loadEmbeddingOrders();
+        } catch (error) {
+            showToast('Erreur lors de la création', 'error');
+        }
+    }
+
+    async function addProductToEmbeddingOrder(orderId) {
+        const productId = prompt('Entrez l\'ID ou nom du produit à ajouter:');
+        if (!productId) return;
+
+        // Find product by name
+        const product = allProducts.find(p => p.nom.toLowerCase().includes(productId.toLowerCase()));
+        if (!product) {
+            showToast('Produit non trouvé', 'error');
+            return;
+        }
+
+        const qty = parseInt(prompt('Quantité:', '1')) || 1;
+
+        try {
+            await api.post(`/api/orders/embedding/${orderId}/products`, {
+                nom: product.nom,
+                prix: product.prix,
+                quantite: qty
+            });
+            showToast('Produit ajouté à la commande ($push)', 'success');
+            loadEmbeddingOrders();
+        } catch (error) {
+            showToast('Erreur', 'error');
+        }
+    }
+
+    // =====================
+    // LINKING ORDERS
+    // =====================
+
+    async function loadLinkingOrders() {
+        const container = document.getElementById('linking-orders');
+        try {
+            const response = await api.get('/api/orders/linking');
+            const orders = response.data || [];
+
+            if (orders.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>Aucune commande (linking)</p></div>';
+                return;
+            }
+
+            container.innerHTML = orders.map(order => {
+                const client = order.client_details?.[0];
+                const clientName = client ? `${client.prenom} ${client.nom}` : 'Client inconnu';
+
+                return `
+            <div class="order-card linking">
+                <div class="order-header">
+                    <div class="order-id">#${order._id.substring(0, 8)}...</div>
+                    <span class="order-status status-${order.statut.toLowerCase().replace(' ', '-')}">${order.statut}</span>
+                </div>
+                <div class="order-body">
+                    <div class="order-client">👤 ${clientName}</div>
+                    <div class="order-date">📅 ${formatDate(order.date_commande)}</div>
+                    <div class="order-products">
+                        ${order.produits.map(p => {
+                    const productDetails = order.produits_details?.find(pd => pd._id === p.produit_id);
+                    const productName = productDetails?.nom || `ID: ${p.produit_id.substring(0, 8)}...`;
+                    const productPrix = productDetails?.prix || 0;
+                    return `
+                            <div class="order-product-item">
+                                <span>${productName} × ${p.quantite}</span>
+                                <span>${formatCurrency(productPrix * p.quantite)}</span>
+                            </div>
+                            `;
+                }).join('')}
+                    </div>
+                    <div class="order-info-badge">🔗 Linking (références _id)</div>
+                </div>
+                <div class="order-actions">
+                    <button class="btn btn-sm btn-secondary" onclick="viewLinkingOrder('${order._id}')">Détails</button>
+                </div>
+            </div>
+            `;
+            }).join('');
+
+        } catch (error) {
+            container.innerHTML = '<div class="error-message">Erreur de chargement</div>';
+        }
+    }
+
+    function addProductToLinking() {
+        const select = document.getElementById('link-product-select');
+        const qty = parseInt(document.getElementById('link-product-qty').value) || 1;
+        const option = select.options[select.selectedIndex];
+
+        if (!select.value) return;
+
+        const product = {
+            produit_id: select.value,
+            nom: option.dataset.nom,
+            prix: parseFloat(option.dataset.prix),
+            quantite: qty
+        };
+
+        linkingOrderProducts.push(product);
+        renderLinkingSelectedProducts();
+        select.value = '';
+        document.getElementById('link-product-qty').value = 1;
+    }
+
+    function renderLinkingSelectedProducts() {
+        const container = document.getElementById('link-products-list');
+        if (linkingOrderProducts.length === 0) {
+            container.innerHTML = '<div class="empty-text">Aucun produit ajouté</div>';
+            return;
+        }
+
+        container.innerHTML = linkingOrderProducts.map((p, idx) => `
+        <div class="selected-product-item">
+            <span>${p.nom} × ${p.quantite}</span>
+            <span class="product-id-badge">ID: ${p.produit_id.substring(0, 8)}...</span>
+            <button type="button" class="btn-remove" onclick="removeLinkingProduct(${idx})">×</button>
+        </div>
+    `).join('');
+    }
+
+    function removeLinkingProduct(index) {
+        linkingOrderProducts.splice(index, 1);
+        renderLinkingSelectedProducts();
+    }
+
+    async function handleAddLinkingOrder(event) {
+        event.preventDefault();
+
+        if (linkingOrderProducts.length === 0) {
+            showToast('Ajoutez au moins un produit', 'error');
+            return;
+        }
+
+        const orderData = {
+            client_id: document.getElementById('link-client').value,
+            statut: document.getElementById('link-statut').value,
+            produits: linkingOrderProducts.map(p => ({
+                produit_id: p.produit_id,
+                quantite: p.quantite
+            }))
+        };
+
+        try {
+            await api.post('/api/orders/linking', orderData);
+            showToast('Commande (linking) créée!', 'success');
+            closeModal('add-linking-modal');
+            linkingOrderProducts = [];
+            renderLinkingSelectedProducts();
+            document.getElementById('add-linking-form').reset();
+            loadLinkingOrders();
+        } catch (error) {
+            showToast('Erreur lors de la création', 'error');
+        }
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '-';
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('fr-FR', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+</script>
+{% endblock %}
