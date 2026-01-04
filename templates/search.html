@@ -90,8 +90,9 @@
                         <span class="badge">$or</span>
                     </div>
                     <div class="op-body">
-                        <p>Catégorie = Chaussures <br><strong>OU</strong><br> Prix < 50€</p>
-                                <button class="btn btn-sm btn-primary" onclick="testOperator('$or')">Tester</button>
+                        <p>Catégorie = Chaussures <br><strong>OU</strong><br> Prix &lt; 50€</p>
+                        <button type="button" class="btn btn-sm btn-primary"
+                            onclick="testOperator('$or')">Tester</button>
                     </div>
                 </div>
 
@@ -103,10 +104,10 @@
                     </div>
                     <div class="op-body">
                         <label>Expression JS:</label>
-                        <input type="text" id="where-value" value="this.prix * this.stock > 2000" disabled
-                            class="code-input">
+                        <input type="text" id="where-value" value="this.prix * this.stock > 2000" class="code-input">
                         <p class="tiny-text">Produits dont la valeur du stock > 2000</p>
-                        <button class="btn btn-sm btn-primary" onclick="testOperator('$where')">Tester</button>
+                        <button type="button" class="btn btn-sm btn-primary"
+                            onclick="testOperator('$where')">Tester</button>
                     </div>
                 </div>
             </div>
@@ -149,6 +150,7 @@
 {% block scripts %}
 <script>
     async function testOperator(operator) {
+        console.log('Testing operator:', operator);
         const tbody = document.getElementById('results-body');
         const countBadge = document.getElementById('results-count');
         const queryPreview = document.getElementById('query-preview');
@@ -158,37 +160,42 @@
         let params = {};
 
         // Prepare params based on operator
-        if (operator === '$gt') {
-            const val = parseFloat(document.getElementById('gt-value').value);
-            params = { field: 'prix', value: val };
-            document.getElementById('gt-display').textContent = val;
-        }
-        else if (operator === '$gte') {
-            const val = parseFloat(document.getElementById('gte-value').value);
-            params = { field: 'stock', value: val };
-            document.getElementById('gte-display').textContent = val;
-        }
-        else if (operator === '$regex') {
-            const val = document.getElementById('regex-value').value;
-            params = { field: 'nom', pattern: val, options: 'i' };
-            document.getElementById('regex-display').textContent = val;
-        }
-        else if (operator === '$in') {
-            const checked = Array.from(document.querySelectorAll('.in-check:checked')).map(cb => cb.value);
-            params = { field: 'categorie', values: checked };
-        }
-        else if (operator === '$or') {
-            params = { conditions: [{ categorie: 'Chaussures' }, { prix: { '$lt': 50 } }] };
-        }
-        else if (operator === '$where') {
-            params = { expression: 'this.prix * this.stock > 2000' };
-        }
-
         try {
+            if (operator === '$gt') {
+                const val = parseFloat(document.getElementById('gt-value').value);
+                params = { field: 'prix', value: val };
+                document.getElementById('gt-display').textContent = val;
+            }
+            else if (operator === '$gte') {
+                const val = parseFloat(document.getElementById('gte-value').value);
+                params = { field: 'stock', value: val };
+                document.getElementById('gte-display').textContent = val;
+            }
+            else if (operator === '$regex') {
+                const val = document.getElementById('regex-value').value;
+                params = { field: 'nom', pattern: val, options: 'i' };
+                document.getElementById('regex-display').textContent = val;
+            }
+            else if (operator === '$in') {
+                const checked = Array.from(document.querySelectorAll('.in-check:checked')).map(cb => cb.value);
+                params = { field: 'categorie', values: checked };
+            }
+            else if (operator === '$or') {
+                params = { conditions: [{ categorie: 'Chaussures' }, { prix: { '$lt': 50 } }] };
+            }
+            else if (operator === '$where') {
+                const val = document.getElementById('where-value').value;
+                params = { expression: val };
+            }
+
+            console.log('Sending params:', params);
+
             const response = await api.post('/api/demo/operators', {
                 operator: operator,
                 params: params
             });
+
+            console.log('Response:', response);
 
             // Show actual query used
             queryPreview.innerHTML = `Requête MongoDB: <code>${JSON.stringify(response.query)}</code>`;
@@ -212,8 +219,8 @@
         `).join('');
 
         } catch (error) {
-            tbody.innerHTML = '<tr><td colspan="5" class="error">Erreur lors de la requête</td></tr>';
-            console.error(error);
+            console.error('Test Operator Error:', error);
+            tbody.innerHTML = `<tr><td colspan="5" class="error">Erreur: ${error.message}</td></tr>`;
         }
     }
 </script>
