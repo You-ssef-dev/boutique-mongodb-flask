@@ -81,12 +81,26 @@
             const response = await api.get('/api/stats/stock-by-category');
             const data = response.data || [];
             container.innerHTML = data.map(cat => `
-            <div class="stat-card-large">
-                <h3>${cat._id}</h3>
-                <div class="stat-details">
-                    <div class="stat-row"><span>Produits</span><span>${cat.nombre_produits}</span></div>
-                    <div class="stat-row"><span>Stock</span><span>${cat.stock_total}</span></div>
-                    <div class="stat-row highlight"><span>Valeur</span><span>${formatCurrency(cat.valeur_stock)}</span></div>
+            <div class="stat-card-premium">
+                <div class="card-glow"></div>
+                <div class="card-content">
+                    <div class="card-top">
+                        <h3>${cat._id}</h3>
+                        <div class="mini-stats">
+                            <div class="mini-stat" title="Produits">
+                                <i class='bx bxs-cube'></i>
+                                <span>${cat.nombre_produits}</span>
+                            </div>
+                            <div class="mini-stat" title="Stock Total">
+                                <i class='bx bxs-layer'></i>
+                                <span>${cat.stock_total}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-hero">
+                        <span class="hero-label">Valeur Estimée</span>
+                        <span class="hero-value">${formatCurrency(cat.valeur_stock)}</span>
+                    </div>
                 </div>
             </div>
         `).join('') || '<div>Aucune donnée</div>';

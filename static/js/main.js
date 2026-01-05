@@ -102,5 +102,35 @@ function formatCurrency(amount) {
 /* --- Navigation Active State --- */
 document.addEventListener('DOMContentLoaded', () => {
     // Current path highlighting is handled by Jinja2 in base.html
-    // Extra JS logic can go here if needed
+
+    // Theme Toggle Logic
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const themeIcon = themeToggleBtn ? themeToggleBtn.querySelector('i') : null;
+    const html = document.documentElement;
+
+    // Initialize icon based on current theme
+    const currentTheme = html.getAttribute('data-theme') || 'dark';
+    if (themeIcon) {
+        themeIcon.className = currentTheme === 'light' ? 'bx bxs-sun' : 'bx bxs-moon';
+    }
+
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            const oldTheme = html.getAttribute('data-theme') || 'dark';
+            const newTheme = oldTheme === 'dark' ? 'light' : 'dark';
+
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+
+            // Update Icon
+            if (themeIcon) {
+                themeIcon.className = newTheme === 'light' ? 'bx bxs-sun' : 'bx bxs-moon';
+            }
+
+            // Show toast
+            if (typeof showToast === 'function') {
+                showToast(`Switched to ${newTheme === 'light' ? 'Light' : 'Dark'} Mode`, 'success');
+            }
+        });
+    }
 });

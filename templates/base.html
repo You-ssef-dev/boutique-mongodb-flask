@@ -5,6 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}BoutiqueComplete1{% endblock %}</title>
+    <script>
+        // Inline script to prevent FOUC (Flash of Unstyled Content)
+        (function () {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -54,6 +61,9 @@
         <header class="top-header">
             <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
             <div class="header-actions">
+                <button id="theme-toggle" class="btn-icon" aria-label="Toggle Theme">
+                    <i class='bx bxs-moon'></i>
+                </button>
                 {% block header_actions %}{% endblock %}
             </div>
         </header>
