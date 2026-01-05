@@ -45,7 +45,9 @@ function showToast(message, type = 'success') {
     toast.className = `toast ${type}`;
 
     // Icon
-    const icon = type === 'success' ? '✅' : '❌';
+    const icon = type === 'success'
+        ? "<i class='bx bxs-check-circle'></i>"
+        : "<i class='bx bxs-error-circle'></i>";
 
     toast.innerHTML = `
         <span class="toast-icon">${icon}</span>

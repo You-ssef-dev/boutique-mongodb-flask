@@ -1,40 +1,43 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}BoutiqueComplete1{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 </head>
+
 <body>
     <!-- Sidebar Navigation -->
     <aside class="sidebar">
         <div class="sidebar-header">
             <div class="logo">
-                <span class="logo-icon">🛍️</span>
+                <span class="logo-icon"><i class='bx bxs-store'></i></span>
                 <span class="logo-text">Boutique<span class="accent">Complete</span></span>
             </div>
         </div>
         <nav class="sidebar-nav">
             <a href="/" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">
-                <span class="nav-icon">📊</span>
+                <span class="nav-icon"><i class='bx bxs-dashboard'></i></span>
                 <span>Dashboard</span>
             </a>
             <a href="/products" class="nav-link {% if request.endpoint == 'products_page' %}active{% endif %}">
-                <span class="nav-icon">📦</span>
+                <span class="nav-icon"><i class='bx bxs-package'></i></span>
                 <span>Produits</span>
             </a>
             <a href="/orders" class="nav-link {% if request.endpoint == 'orders_page' %}active{% endif %}">
-                <span class="nav-icon">🧾</span>
+                <span class="nav-icon"><i class='bx bxs-receipt'></i></span>
                 <span>Commandes</span>
             </a>
             <a href="/aggregation" class="nav-link {% if request.endpoint == 'aggregation_page' %}active{% endif %}">
-                <span class="nav-icon">📈</span>
+                <span class="nav-icon"><i class='bx bxs-chart'></i></span>
                 <span>Statistiques</span>
             </a>
             <a href="/search" class="nav-link {% if request.endpoint == 'search_page' %}active{% endif %}">
-                <span class="nav-icon">🔍</span>
+                <span class="nav-icon"><i class='bx bxs-search'></i></span>
                 <span>Recherche</span>
             </a>
         </nav>
@@ -54,10 +57,10 @@
                 {% block header_actions %}{% endblock %}
             </div>
         </header>
-        
+
         <!-- Toast Notifications -->
         <div id="toast-container"></div>
-        
+
         <div class="content-area">
             {% block content %}{% endblock %}
         </div>
@@ -66,4 +69,5 @@
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     {% block scripts %}{% endblock %}
 </body>
+
 </html>

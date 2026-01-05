@@ -8,7 +8,7 @@
     <!-- Embedding Orders Section -->
     <div class="card orders-section">
         <div class="card-header">
-            <h2>📦 Commandes (Embedding)</h2>
+            <h2><i class='bx bxs-package'></i> Commandes (Embedding)</h2>
             <button class="btn btn-primary btn-sm" onclick="openModal('add-embedding-modal')">
                 + Nouvelle Commande
             </button>
@@ -26,7 +26,7 @@
     <!-- Linking Orders Section -->
     <div class="card orders-section">
         <div class="card-header">
-            <h2>🔗 Commandes (Linking)</h2>
+            <h2><i class='bx bx-link'></i> Commandes (Linking)</h2>
             <button class="btn btn-primary btn-sm" onclick="openModal('add-linking-modal')">
                 + Nouvelle Commande
             </button>
@@ -47,7 +47,7 @@
     <div class="modal-overlay" onclick="closeModal('add-embedding-modal')"></div>
     <div class="modal-content modal-lg">
         <div class="modal-header">
-            <h2>📦 Nouvelle Commande (Embedding)</h2>
+            <h2><i class='bx bxs-package'></i> Nouvelle Commande (Embedding)</h2>
             <button class="modal-close" onclick="closeModal('add-embedding-modal')">×</button>
         </div>
         <form id="add-embedding-form" onsubmit="handleAddEmbeddingOrder(event)">
@@ -87,7 +87,7 @@
     <div class="modal-overlay" onclick="closeModal('add-linking-modal')"></div>
     <div class="modal-content modal-lg">
         <div class="modal-header">
-            <h2>🔗 Nouvelle Commande (Linking)</h2>
+            <h2><i class='bx bx-link'></i> Nouvelle Commande (Linking)</h2>
             <button class="modal-close" onclick="closeModal('add-linking-modal')">×</button>
         </div>
         <form id="add-linking-form" onsubmit="handleAddLinkingOrder(event)">
@@ -204,14 +204,18 @@
             }
 
             container.innerHTML = orders.map(order => `
-            <div class="order-card">
+            <div class="order-card" data-order-id="${order._id}">
                 <div class="order-header">
                     <div class="order-id">#${order._id.substring(0, 8)}...</div>
-                    <span class="order-status status-${order.statut.toLowerCase().replace(' ', '-')}">${order.statut}</span>
+                    <select class="order-status-select" onchange="updateEmbeddingStatus('${order._id}', this.value)">
+                        <option value="En cours" ${order.statut === 'En cours' ? 'selected' : ''}>En cours</option>
+                        <option value="En préparation" ${order.statut === 'En préparation' ? 'selected' : ''}>En préparation</option>
+                        <option value="Livrée" ${order.statut === 'Livrée' ? 'selected' : ''}>Livrée</option>
+                    </select>
                 </div>
                 <div class="order-body">
-                    <div class="order-client">👤 ${order.client_nom}</div>
-                    <div class="order-date">📅 ${formatDate(order.date_commande)}</div>
+                    <div class="order-client"><i class='bx bx-user'></i> ${order.client_nom}</div>
+                    <div class="order-date"><i class='bx bx-calendar'></i> ${formatDate(order.date_commande)}</div>
                     <div class="order-products">
                         ${order.produits.map(p => `
                             <div class="order-product-item">
@@ -223,8 +227,8 @@
                     <div class="order-total">Total: ${formatCurrency(order.total)}</div>
                 </div>
                 <div class="order-actions">
-                    <button class="btn btn-sm btn-secondary" onclick="viewEmbeddingOrder('${order._id}')">Détails</button>
-                    <button class="btn btn-sm btn-ghost" onclick="addProductToEmbeddingOrder('${order._id}')">+ Produit</button>
+                    <button class="btn btn-sm btn-ghost" onclick="addProductToEmbeddingOrder('${order._id}')"><i class='bx bx-plus'></i> Produit</button>
+                    <button class="btn btn-sm btn-ghost danger" onclick="deleteEmbeddingOrder('${order._id}')"><i class='bx bx-trash'></i> Supprimer</button>
                 </div>
             </div>
         `).join('');
@@ -347,14 +351,18 @@
                 const clientName = client ? `${client.prenom} ${client.nom}` : 'Client inconnu';
 
                 return `
-            <div class="order-card linking">
+            <div class="order-card linking" data-order-id="${order._id}">
                 <div class="order-header">
                     <div class="order-id">#${order._id.substring(0, 8)}...</div>
-                    <span class="order-status status-${order.statut.toLowerCase().replace(' ', '-')}">${order.statut}</span>
+                    <select class="order-status-select" onchange="updateLinkingStatus('${order._id}', this.value)">
+                        <option value="En cours" ${order.statut === 'En cours' ? 'selected' : ''}>En cours</option>
+                        <option value="En préparation" ${order.statut === 'En préparation' ? 'selected' : ''}>En préparation</option>
+                        <option value="Livrée" ${order.statut === 'Livrée' ? 'selected' : ''}>Livrée</option>
+                    </select>
                 </div>
                 <div class="order-body">
-                    <div class="order-client">👤 ${clientName}</div>
-                    <div class="order-date">📅 ${formatDate(order.date_commande)}</div>
+                    <div class="order-client"><i class='bx bx-user'></i> ${clientName}</div>
+                    <div class="order-date"><i class='bx bx-calendar'></i> ${formatDate(order.date_commande)}</div>
                     <div class="order-products">
                         ${order.produits.map(p => {
                     const productDetails = order.produits_details?.find(pd => pd._id === p.produit_id);
@@ -368,10 +376,10 @@
                             `;
                 }).join('')}
                     </div>
-                    <div class="order-info-badge">🔗 Linking (références _id)</div>
+                    <div class="order-info-badge"><i class='bx bx-link'></i> Linking (références _id)</div>
                 </div>
                 <div class="order-actions">
-                    <button class="btn btn-sm btn-secondary" onclick="viewLinkingOrder('${order._id}')">Détails</button>
+                    <button class="btn btn-sm btn-ghost danger" onclick="deleteLinkingOrder('${order._id}')"><i class='bx bx-trash'></i> Supprimer</button>
                 </div>
             </div>
             `;
@@ -464,5 +472,54 @@
             minute: '2-digit'
         });
     }
+
+    // =====================
+    // DELETE & UPDATE FUNCTIONS
+    // =====================
+
+    async function deleteEmbeddingOrder(orderId) {
+        if (!confirm('Êtes-vous sûr de vouloir supprimer cette commande ?')) return;
+
+        try {
+            await api.delete(`/api/orders/embedding/${orderId}`);
+            showToast('Commande supprimée', 'success');
+            loadEmbeddingOrders();
+        } catch (error) {
+            showToast('Erreur lors de la suppression', 'error');
+        }
+    }
+
+    async function updateEmbeddingStatus(orderId, newStatus) {
+        try {
+            await api.put(`/api/orders/embedding/${orderId}`, { statut: newStatus });
+            showToast(`Statut mis à jour: ${newStatus}`, 'success');
+        } catch (error) {
+            showToast('Erreur lors de la mise à jour', 'error');
+            loadEmbeddingOrders(); // Reload to reset the select
+        }
+    }
+
+    async function deleteLinkingOrder(orderId) {
+        if (!confirm('Êtes-vous sûr de vouloir supprimer cette commande ?')) return;
+
+        try {
+            await api.delete(`/api/orders/linking/${orderId}`);
+            showToast('Commande supprimée', 'success');
+            loadLinkingOrders();
+        } catch (error) {
+            showToast('Erreur lors de la suppression', 'error');
+        }
+    }
+
+    async function updateLinkingStatus(orderId, newStatus) {
+        try {
+            await api.put(`/api/orders/linking/${orderId}`, { statut: newStatus });
+            showToast(`Statut mis à jour: ${newStatus}`, 'success');
+        } catch (error) {
+            showToast('Erreur lors de la mise à jour', 'error');
+            loadLinkingOrders(); // Reload to reset the select
+        }
+    }
+
 </script>
 {% endblock %}

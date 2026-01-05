@@ -462,6 +462,60 @@ def remove_product_from_embedding(order_id):
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 400
 
+
+@app.route('/api/orders/embedding/<order_id>', methods=['DELETE'])
+def delete_order_embedding(order_id):
+    """Delete an embedded order."""
+    db = get_db()
+    
+    try:
+        result = db.CommandesEmbedding.delete_one({'_id': ObjectId(order_id)})
+        
+        if result.deleted_count == 0:
+            return jsonify({'success': False, 'error': 'Order not found'}), 404
+        
+        return jsonify({
+            'success': True,
+            'message': 'Embedded order deleted'
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
+@app.route('/api/orders/embedding/<order_id>', methods=['PUT'])
+def update_order_embedding(order_id):
+    """Update an embedded order (status, client_nom)."""
+    db = get_db()
+    data = request.get_json()
+    
+    try:
+        update_fields = {}
+        
+        if 'statut' in data:
+            update_fields['statut'] = data['statut']
+        if 'client_nom' in data:
+            update_fields['client_nom'] = data['client_nom']
+        
+        if not update_fields:
+            return jsonify({'success': False, 'error': 'No fields to update'}), 400
+        
+        result = db.CommandesEmbedding.update_one(
+            {'_id': ObjectId(order_id)},
+            {'$set': update_fields}
+        )
+        
+        if result.matched_count == 0:
+            return jsonify({'success': False, 'error': 'Order not found'}), 404
+        
+        updated = db.CommandesEmbedding.find_one({'_id': ObjectId(order_id)})
+        return jsonify({
+            'success': True,
+            'data': serialize_doc(updated),
+            'message': 'Embedded order updated'
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
 # ============================================================
 # API ROUTES - ORDERS (LINKING)
 # ============================================================
@@ -570,6 +624,58 @@ def remove_product_from_linking(order_id, product_id):
             'success': True,
             'data': serialize_doc(updated),
             'message': 'Product removed from linked order'
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
+@app.route('/api/orders/linking/<order_id>', methods=['DELETE'])
+def delete_order_linking(order_id):
+    """Delete a linked order."""
+    db = get_db()
+    
+    try:
+        result = db.CommandesLinking.delete_one({'_id': ObjectId(order_id)})
+        
+        if result.deleted_count == 0:
+            return jsonify({'success': False, 'error': 'Order not found'}), 404
+        
+        return jsonify({
+            'success': True,
+            'message': 'Linked order deleted'
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
+@app.route('/api/orders/linking/<order_id>', methods=['PUT'])
+def update_order_linking(order_id):
+    """Update a linked order (status)."""
+    db = get_db()
+    data = request.get_json()
+    
+    try:
+        update_fields = {}
+        
+        if 'statut' in data:
+            update_fields['statut'] = data['statut']
+        
+        if not update_fields:
+            return jsonify({'success': False, 'error': 'No fields to update'}), 400
+        
+        result = db.CommandesLinking.update_one(
+            {'_id': ObjectId(order_id)},
+            {'$set': update_fields}
+        )
+        
+        if result.matched_count == 0:
+            return jsonify({'success': False, 'error': 'Order not found'}), 404
+        
+        updated = db.CommandesLinking.find_one({'_id': ObjectId(order_id)})
+        return jsonify({
+            'success': True,
+            'data': serialize_doc(updated),
+            'message': 'Linked order updated'
         })
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 400

@@ -5,7 +5,7 @@
 
 {% block header_actions %}
 <button class="btn btn-primary" onclick="openModal('add-product-modal')">
-    <span>➕</span> Nouveau Produit
+    <span><i class='bx bx-plus'></i></span> Nouveau Produit
 </button>
 {% endblock %}
 
@@ -14,7 +14,7 @@
     <!-- Filters Panel -->
     <div class="filters-panel card">
         <div class="card-header">
-            <h3>🔍 Filtres</h3>
+            <h3><i class='bx bx-search-alt'></i> Filtres</h3>
             <button class="btn btn-sm btn-ghost" onclick="resetFilters()">Réinitialiser</button>
         </div>
         <div class="card-body">
@@ -73,7 +73,7 @@
     <div class="modal-overlay" onclick="closeModal('add-product-modal')"></div>
     <div class="modal-content">
         <div class="modal-header">
-            <h2>➕ Nouveau Produit</h2>
+            <h2><i class='bx bx-plus-circle'></i> Nouveau Produit</h2>
             <button class="modal-close" onclick="closeModal('add-product-modal')">×</button>
         </div>
         <form id="add-product-form" onsubmit="handleAddProduct(event)">
@@ -116,7 +116,7 @@
     <div class="modal-overlay" onclick="closeModal('edit-product-modal')"></div>
     <div class="modal-content">
         <div class="modal-header">
-            <h2>✏️ Modifier le Produit</h2>
+            <h2><i class='bx bx-edit'></i> Modifier le Produit</h2>
             <button class="modal-close" onclick="closeModal('edit-product-modal')">×</button>
         </div>
         <form id="edit-product-form" onsubmit="handleEditProduct(event)">
@@ -214,7 +214,7 @@
         const container = document.getElementById('products-container');
 
         if (currentProducts.length === 0) {
-            container.innerHTML = '<div class="empty-state"><span>📦</span><p>Aucun produit trouvé</p></div>';
+            container.innerHTML = '<div class="empty-state"><span><i class=\'bx bx-package\'></i></span><p>Aucun produit trouvé</p></div>';
             return;
         }
 
@@ -223,10 +223,10 @@
             <div class="product-header">
                 <span class="product-category">${product.categorie}</span>
                 <div class="product-actions-dropdown">
-                    <button class="btn-icon" onclick="toggleDropdown(event, '${product._id}')">⋮</button>
+                    <button class="btn-icon" onclick="toggleDropdown(event, '${product._id}')"><i class='bx bx-dots-vertical-rounded'></i></button>
                     <div class="dropdown-menu" id="dropdown-${product._id}">
-                        <button onclick="editProduct('${product._id}')">✏️ Modifier</button>
-                        <button onclick="deleteProduct('${product._id}')" class="danger">🗑️ Supprimer</button>
+                        <button onclick="editProduct('${product._id}')"><i class='bx bx-edit-alt'></i> Modifier</button>
+                        <button onclick="deleteProduct('${product._id}')" class="danger"><i class='bx bx-trash'></i> Supprimer</button>
                     </div>
                 </div>
             </div>
