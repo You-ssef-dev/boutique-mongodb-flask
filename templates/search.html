@@ -155,7 +155,8 @@
         const countBadge = document.getElementById('results-count');
         const queryPreview = document.getElementById('query-preview');
 
-        tbody.innerHTML = '<tr><td colspan="5" class="loading">Chargement...</td></tr>';
+        // Fix: Use empty-content wrapper for loading state
+        tbody.innerHTML = '<tr><td colspan="5" class="loading"><div class="empty-content">Chargement...</div></td></tr>';
 
         let params = {};
 
@@ -204,19 +205,26 @@
             countBadge.textContent = `${response.count} résultats`;
 
             if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="empty">Aucun résultat trouvé</td></tr>';
+                // Fix: Use empty-content wrapper for empty state
+                tbody.innerHTML = '<tr><td colspan="5" class="empty"><div class="empty-content">Aucun résultat trouvé</div></td></tr>';
                 return;
             }
 
-            tbody.innerHTML = data.map(p => `
+            tbody.innerHTML = data.map(p => {
+                // Logic for stock badge color
+                let stockClass = 'high';
+                if (p.stock < 20) stockClass = 'low'; // User req: 0-19 Red
+                else if (p.stock < 50) stockClass = 'medium'; // User req: 20-49 Orange
+
+                return `
             <tr>
                 <td><strong>${p.nom}</strong></td>
                 <td><span class="badge">${p.categorie}</span></td>
                 <td>${formatCurrency(p.prix)}</td>
-                <td>${p.stock}</td>
+                <td><span class="stock-badge ${stockClass}">${p.stock}</span></td>
                 <td><small>${p.tags ? 'Tags: ' + p.tags.join(', ') : '-'}</small></td>
             </tr>
-        `).join('');
+        `}).join('');
 
         } catch (error) {
             console.error('Test Operator Error:', error);

@@ -124,9 +124,18 @@
         const tbody = document.getElementById('top-products');
         try {
             const response = await api.get('/api/stats/top-products');
-            tbody.innerHTML = (response.data || []).map((p, i) =>
-                `<tr><td>${i + 1}</td><td>${p._id}</td><td>${p.quantite_vendue}</td><td>${formatCurrency(p.revenue)}</td></tr>`
-            ).join('') || '<tr><td colspan="4">Aucune vente</td></tr>';
+            tbody.innerHTML = (response.data || []).map((p, i) => {
+                let badgeClass = 'high';
+                if (p.quantite_vendue < 20) badgeClass = 'low';
+                else if (p.quantite_vendue < 50) badgeClass = 'medium';
+
+                return `<tr>
+                    <td>${i + 1}</td>
+                    <td><strong>${p._id}</strong></td>
+                    <td><span class="stock-badge ${badgeClass}">${p.quantite_vendue}</span></td>
+                    <td>${formatCurrency(p.revenue)}</td>
+                </tr>`;
+            }).join('') || '<tr><td colspan="4" class="empty">Aucune vente</td></tr>';
         } catch (error) { tbody.innerHTML = '<tr><td colspan="4">Erreur</td></tr>'; }
     }
 

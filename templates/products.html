@@ -3,11 +3,7 @@
 {% block title %}Produits - BoutiqueComplete1{% endblock %}
 {% block page_title %}Gestion des Produits{% endblock %}
 
-{% block header_actions %}
-<button class="btn btn-primary" onclick="openModal('add-product-modal')">
-    <span><i class='bx bx-plus'></i></span> Nouveau Produit
-</button>
-{% endblock %}
+
 
 {% block content %}
 <div class="page-layout">
@@ -19,11 +15,11 @@
         </div>
         <div class="card-body">
             <div class="filter-group">
-                <label>Recherche</label>
+                <label for="filter-search">Recherche</label>
                 <input type="text" id="filter-search" placeholder="Nom du produit..." oninput="applyFilters()">
             </div>
             <div class="filter-group">
-                <label>Catégorie</label>
+                <label for="filter-category">Catégorie</label>
                 <select id="filter-category" onchange="applyFilters()">
                     <option value="">Toutes</option>
                     <option value="Vêtements">Vêtements</option>
@@ -32,19 +28,19 @@
                 </select>
             </div>
             <div class="filter-group">
-                <label>Prix min (€)</label>
+                <label for="filter-min-price">Prix min (€)</label>
                 <input type="number" id="filter-min-price" placeholder="0" oninput="applyFilters()">
             </div>
             <div class="filter-group">
-                <label>Prix max (€)</label>
+                <label for="filter-max-price">Prix max (€)</label>
                 <input type="number" id="filter-max-price" placeholder="999" oninput="applyFilters()">
             </div>
             <div class="filter-group">
-                <label>Stock minimum</label>
+                <label for="filter-min-stock">Stock minimum</label>
                 <input type="number" id="filter-min-stock" placeholder="0" oninput="applyFilters()">
             </div>
             <div class="filter-group">
-                <label>Trier par</label>
+                <label for="filter-sort">Trier par</label>
                 <select id="filter-sort" onchange="applyFilters()">
                     <option value="nom">Nom (A-Z)</option>
                     <option value="-nom">Nom (Z-A)</option>
@@ -60,7 +56,12 @@
     <div class="main-panel">
         <div class="results-header">
             <span id="results-count">0 produits</span>
-            <div class="pagination" id="pagination"></div>
+            <div class="results-header-actions">
+                <div class="pagination" id="pagination"></div>
+                <button class="btn btn-primary btn-sm" onclick="openModal('add-product-modal')">
+                    <i class='bx bx-plus'></i> Nouveau Produit
+                </button>
+            </div>
         </div>
         <div class="products-grid" id="products-container">
             <div class="loading-spinner">Chargement...</div>
@@ -114,46 +115,60 @@
 <!-- Edit Product Modal -->
 <div class="modal" id="edit-product-modal">
     <div class="modal-overlay" onclick="closeModal('edit-product-modal')"></div>
-    <div class="modal-content">
+    <div class="modal-content edit-product-modal">
         <div class="modal-header">
             <h2><i class='bx bx-edit'></i> Modifier le Produit</h2>
             <button class="modal-close" onclick="closeModal('edit-product-modal')">×</button>
         </div>
         <form id="edit-product-form" onsubmit="handleEditProduct(event)">
             <input type="hidden" id="edit-id" name="id">
-            <div class="form-group">
-                <label for="edit-nom">Nom du produit *</label>
-                <input type="text" id="edit-nom" name="nom" required>
-            </div>
-            <div class="form-row">
+            <div class="edit-form-grid">
+                <!-- Product Name - Full Width -->
+                <div class="form-group full-width">
+                    <label for="edit-nom">Nom du produit *</label>
+                    <input type="text" id="edit-nom" name="nom" required>
+                </div>
+
+                <!-- Prix -->
                 <div class="form-group">
                     <label for="edit-prix">Prix (€) *</label>
                     <input type="number" id="edit-prix" name="prix" step="0.01" min="0" required>
                 </div>
+
+                <!-- Stock -->
                 <div class="form-group">
                     <label for="edit-stock">Stock *</label>
                     <input type="number" id="edit-stock" name="stock" min="0" required>
                 </div>
-            </div>
-            <div class="form-group">
-                <label for="edit-categorie">Catégorie *</label>
-                <select id="edit-categorie" name="categorie" required>
-                    <option value="Vêtements">Vêtements</option>
-                    <option value="Chaussures">Chaussures</option>
-                    <option value="Accessoires">Accessoires</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Tags actuels</label>
-                <div id="edit-tags-container" class="tags-container"></div>
-                <div class="tag-input-row">
-                    <input type="text" id="edit-new-tag" placeholder="Ajouter un tag...">
-                    <button type="button" class="btn btn-sm btn-secondary" onclick="addTagToProduct()">Ajouter</button>
+
+                <!-- Catégorie -->
+                <div class="form-group">
+                    <label for="edit-categorie">Catégorie *</label>
+                    <select id="edit-categorie" name="categorie" required>
+                        <option value="Vêtements">Vêtements</option>
+                        <option value="Chaussures">Chaussures</option>
+                        <option value="Accessoires">Accessoires</option>
+                    </select>
+                </div>
+
+                <!-- Tags Section -->
+                <div class="form-group tags-section">
+                    <label for="edit-new-tag">Tags</label>
+                    <div id="edit-tags-container" class="tags-container"></div>
+                    <div class="tag-input-row">
+                        <input type="text" id="edit-new-tag" placeholder="Nouveau tag...">
+                        <button type="button" class="btn btn-sm btn-accent" onclick="addTagToProduct()">
+                            <i class='bx bx-plus'></i>
+                        </button>
+                    </div>
                 </div>
             </div>
+
             <div class="modal-actions">
                 <button type="button" class="btn btn-ghost" onclick="closeModal('edit-product-modal')">Annuler</button>
-                <button type="submit" class="btn btn-primary">Enregistrer</button>
+                <button type="submit" class="btn btn-primary">
+                    <i class='bx bx-save'></i> Enregistrer
+                </button>
             </div>
         </form>
     </div>
@@ -222,20 +237,18 @@
         <div class="product-card">
             <div class="product-header">
                 <span class="product-category">${product.categorie}</span>
-                <div class="product-actions-dropdown">
-                    <button class="btn-icon" onclick="toggleDropdown(event, '${product._id}')"><i class='bx bx-dots-vertical-rounded'></i></button>
-                    <div class="dropdown-menu" id="dropdown-${product._id}">
-                        <button onclick="editProduct('${product._id}')"><i class='bx bx-edit-alt'></i> Modifier</button>
-                        <button onclick="deleteProduct('${product._id}')" class="danger"><i class='bx bx-trash'></i> Supprimer</button>
-                    </div>
+                <div class="product-actions">
+                    <button class="btn-icon" onclick="editProduct('${product._id}')" title="Modifier"><i class='bx bx-edit-alt'></i></button>
+                    <button class="btn-icon btn-danger" onclick="event.stopPropagation(); deleteProduct('${product._id}')" title="Supprimer"><i class='bx bx-trash'></i></button>
                 </div>
             </div>
             <div class="product-body">
                 <h3 class="product-name">${product.nom}</h3>
                 <div class="product-price">${formatCurrency(product.prix)}</div>
-                <div class="product-stock ${product.stock < 20 ? 'low' : ''}">
-                    <span class="stock-indicator"></span>
-                    ${product.stock} en stock
+                <div class="product-stock">
+                    <span class="stock-badge ${product.stock < 20 ? 'low' : (product.stock < 50 ? 'medium' : 'high')}">
+                        ${product.stock} en stock
+                    </span>
                 </div>
                 ${product.tags && product.tags.length > 0 ? `
                     <div class="product-tags">
