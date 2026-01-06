@@ -9,47 +9,82 @@ echo "========================================"
 # Configuration
 DB_NAME="BoutiqueComplete1"
 EXPORT_DIR="./exports"
+DATE=$(date +%F)
 
 # Create export directory if not exists
 mkdir -p $EXPORT_DIR
 
 echo ""
+echo "Choose an option:"
+echo "1) EXPORT database (backup to JSON)"
+echo "2) IMPORT database (restore from JSON)"
+echo "0) Exit"
+echo "----------------------------------------"
+read -p "👉 Enter your choice: " choice
+
+
+case $choice in
+
+# ================================
+# 1) EXPORT SECTION
+# ================================
+1)
+echo ""
 echo "--- EXPORT OPERATIONS ---"
 echo ""
 
-# Export Produits collection to JSON
 echo "📤 Exporting Produits to JSON..."
-mongoexport --db=$DB_NAME --collection=Produits --out=$EXPORT_DIR/produits.json --jsonArray
-echo "   ✅ Exported to $EXPORT_DIR/produits.json"
+mongoexport --db=$DB_NAME --collection=Produits --out=$EXPORT_DIR/produits_$DATE.json --jsonArray
+echo "   ✅ Exported to $EXPORT_DIR/produits_$DATE.json"
 
-# Export Clients collection
 echo "📤 Exporting Clients to JSON..."
-mongoexport --db=$DB_NAME --collection=Clients --out=$EXPORT_DIR/clients.json --jsonArray
-echo "   ✅ Exported to $EXPORT_DIR/clients.json"
+mongoexport --db=$DB_NAME --collection=Clients --out=$EXPORT_DIR/clients_$DATE.json --jsonArray
+echo "   ✅ Exported to $EXPORT_DIR/clients_$DATE.json"
 
-# Export Orders (Embedding)
 echo "📤 Exporting CommandesEmbedding to JSON..."
-mongoexport --db=$DB_NAME --collection=CommandesEmbedding --out=$EXPORT_DIR/commandes_embedding.json --jsonArray
-echo "   ✅ Exported to $EXPORT_DIR/commandes_embedding.json"
+mongoexport --db=$DB_NAME --collection=CommandesEmbedding --out=$EXPORT_DIR/commandes_embedding_$DATE.json --jsonArray
+echo "   ✅ Exported to $EXPORT_DIR/commandes_embedding_$DATE.json"
 
-# Export Orders (Linking)
 echo "📤 Exporting CommandesLinking to JSON..."
-mongoexport --db=$DB_NAME --collection=CommandesLinking --out=$EXPORT_DIR/commandes_linking.json --jsonArray
-echo "   ✅ Exported to $EXPORT_DIR/commandes_linking.json"
+mongoexport --db=$DB_NAME --collection=CommandesLinking --out=$EXPORT_DIR/commandes_linking_$DATE.json --jsonArray
+echo "   ✅ Exported to $EXPORT_DIR/commandes_linking_$DATE.json"
 
+echo ""
+echo "========================================"
+echo "✅ EXPORT completed successfully!"
+echo "========================================"
+;;
+
+# ================================
+# 2) IMPORT SECTION
+# ================================
+2)
 echo ""
 echo "--- IMPORT OPERATIONS ---"
+echo "⚠️ Warning: existing collections will be DROPPED before restore"
 echo ""
 
-# Re-import Produits (with drop to avoid duplicates in demo)
-echo "📥 Re-importing Produits from JSON..."
-mongoimport --db=$DB_NAME --collection=Produits --file=$EXPORT_DIR/produits.json --jsonArray --drop
-echo "   ✅ Imported from $EXPORT_DIR/produits.json"
+mongoimport --db=$DB_NAME --collection=Produits --file=$EXPORT_DIR/produits_$DATE.json --jsonArray --drop
+mongoimport --db=$DB_NAME --collection=Clients --file=$EXPORT_DIR/clients_$DATE.json --jsonArray --drop
+mongoimport --db=$DB_NAME --collection=CommandesEmbedding --file=$EXPORT_DIR/commandes_embedding_$DATE.json --jsonArray --drop
+mongoimport --db=$DB_NAME --collection=CommandesLinking --file=$EXPORT_DIR/commandes_linking_$DATE.json --jsonArray --drop
 
 echo ""
 echo "========================================"
-echo "✅ Export/Import operations complete!"
+echo "✅ IMPORT completed from backup date: $DATE"
 echo "========================================"
+;;
+
+0)
+echo "👋 Exit"
+exit 0
+;;
+
+*)
+echo "❌ Invalid choice"
+;;
+esac
+
 echo ""
 echo "📁 Exported files location: $EXPORT_DIR/"
 ls -la $EXPORT_DIR/
