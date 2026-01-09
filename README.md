@@ -59,9 +59,6 @@ Run the initialization script to seed the database with sample products, clients
 python db_init.py
 ```
 
-<<<<<<< HEAD
-### 4. Run the Application
-=======
 ### 4. Setup MongoDB Authentication (Optional)
 If MongoDB is running with authentication enabled, you need to create the database users first.
 
@@ -93,26 +90,12 @@ mongosh -u boutiqueUser -p "BoutiquePass2024!" --authenticationDatabase Boutique
 ```
 
 ### 5. Run the Application
->>>>>>> 827668d (Initial commit)
 ```bash
 python app.py
 ```
 Open your browser at [http://localhost:5000](http://localhost:5000).
 
 ---
-
-## 📂 Project Structure
-
-- `app.py`: Main Flask application containing all API routes and controller logic.
-- `db_init.py`: Python script to reset the database and populate it with initial data.
-- `db_auth.js`: MongoDB shell script to create users and set up authentication.
-- `db_ops.sh`: Bash script to demonstrating `mongoexport` and `mongoimport` capabilities.
-- `static/`: Contains `style.css` (Modern Dashboard UI) and `main.js` (Frontend logic).
-- `templates/`: HTML Jinja2 templates for the user interface.
-
-## 🔒 Security & Operations
-- **Authentication**: Includes `db_auth.js` to create a `boutiqueUser` with `readWrite` roles.
-- **Backup**: Includes scripts to export the `Produits` collection to JSON and re-import it.
 
 ## 🤝 Contributing
 Contributions are welcome! Please fork the repository and create a pull request.
