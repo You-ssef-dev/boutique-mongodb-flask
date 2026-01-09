@@ -37,9 +37,14 @@ try {
 
 // Test authentication
 print("\n📋 Existing users in BoutiqueComplete1:");
-db.getUsers().forEach(function(user) {
-    print("   - " + user.user + ": " + JSON.stringify(user.roles));
-});
+var usersResult = db.getUsers();
+if (usersResult && usersResult.users) {
+    usersResult.users.forEach(function (user) {
+        print("   - " + user.user + ": " + JSON.stringify(user.roles));
+    });
+} else {
+    print("   (No users found or unable to list users)");
+}
 
 print("\n✅ Authentication setup complete!");
 print("\n🔐 To test authentication, restart MongoDB with --auth flag and connect with:");
