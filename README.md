@@ -99,3 +99,102 @@ Open your browser at [http://localhost:5000](http://localhost:5000).
 
 ## 🤝 Contributing
 Contributions are welcome! Please fork the repository and create a pull request.
+
+
+
+
+================================================================================
+                    HOW TO USE db_auth.js
+            MongoDB Authentication Setup Script
+================================================================================
+
+PROBLEM:
+--------
+When running "mongosh < db_auth.js", you get errors like:
+  - "Command createUser requires authentication"
+  - "Command usersInfo requires authentication"
+
+This happens because MongoDB is already running with authentication enabled,
+so you cannot create new users without first authenticating.
+
+
+SOLUTION - Step by Step:
+------------------------
+
+1. STOP MONGODB SERVICE
+   Open a terminal and run:
+   
+   sudo systemctl stop mongod
+
+2. START MONGODB WITHOUT AUTHENTICATION (temporarily)
+   Run MongoDB manually without the --auth flag:
+   
+   sudo mongod --dbpath /var/lib/mongodb --port 27017
+
+   (Keep this terminal open)
+
+3. RUN THE AUTHENTICATION SCRIPT
+   Open a NEW terminal and navigate to your project folder:
+   
+   cd /home/youssef/Desktop/boutique-mongodb-flask-main
+   mongosh < db_auth.js
+
+   You should see:
+   ✅ Admin user created
+   ✅ Application user 'boutiqueUser' created with readWrite role on BoutiqueComplete1
+
+4. STOP THE TEMPORARY MONGODB
+   Press Ctrl+C in the terminal where MongoDB is running.
+
+5. RESTART MONGODB WITH AUTHENTICATION
+   sudo systemctl start mongod
+
+6. TEST THE CONNECTION
+   mongosh -u boutiqueUser -p "BoutiquePass2024!" --authenticationDatabase BoutiqueComplete1
+
+
+ALTERNATIVE METHOD (if users already exist):
+--------------------------------------------
+If you've already created the users before and just want to connect:
+
+mongosh -u boutiqueUser -p "BoutiquePass2024!" --authenticationDatabase BoutiqueComplete1
+
+
+CREDENTIALS CREATED BY THE SCRIPT:
+----------------------------------
+Admin User:
+  - Username: boutiqueAdmin
+  - Password: SecurePassword123!
+  - Database: admin
+
+Application User:
+  - Username: boutiqueUser  
+  - Password: BoutiquePass2024!
+  - Database: BoutiqueComplete1
+  - Role: readWrite
+
+
+FOR PYTHON/FLASK CONNECTION:
+----------------------------
+Use this connection string in your app.py:
+
+mongodb://boutiqueUser:BoutiquePass2024!@localhost:27017/BoutiqueComplete1?authSource=BoutiqueComplete1
+
+
+TROUBLESHOOTING:
+----------------
+- Error "connection refused": MongoDB is not running
+  → Run: sudo systemctl start mongod
+
+- Error "authentication failed": Wrong password or database
+  → Double-check credentials above
+
+- Error "user already exists": Users were created before
+  → This is OK! The script handles this with try/catch
+
+================================================================================
+                         Created: 2026-01-08
+================================================================================
+
+chmod +x db_ops.sh
+./db_ops.sh
