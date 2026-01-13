@@ -932,12 +932,31 @@ def demo_operators():
     results = list(db.Produits.find(query, projection))
     
     return jsonify({
+        # Indique que la requête a été exécutée avec succès
+        # Le frontend peut vérifier ce champ pour savoir si tout s’est bien passé
         'success': True,
+
+        # Nom de l’opérateur MongoDB utilisé pour construire la requête
+        # Exemple : "$gt", "$or", "$expr"
         'operator': operator,
+
+        # Requête MongoDB réellement utilisée
+        # json_util.dumps  : convertit les types BSON (ObjectId, Date, etc.) en JSON
+        # json.loads       : reconvertit ce JSON en dictionnaire Python standard
+        # Objectif : éviter les erreurs "not JSON serializable"
         'query': json.loads(json_util.dumps(query)),
+
+        # Nombre total de documents retournés par la requête
+        # Utile pour le debug, la pagination ou l’affichage
         'count': len(results),
+
+        # Liste des documents retournés par MongoDB
+        # serialize_doc :
+        # - transforme les ObjectId en string
+        # - rend les documents compatibles avec jsonify
         'data': serialize_doc(results)
     })
+
 
 # ============================================================
 # ERROR HANDLERS
