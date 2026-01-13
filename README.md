@@ -132,7 +132,63 @@ Use this connection string in your app.py:
 
 mongodb://boutiqueUser:BoutiquePass2024!@localhost:27017/BoutiqueComplete1?authSource=BoutiqueComplete1
 
-================================================================================
+---
 
+## 🔓 Alternative: Disable MongoDB Authentication
+
+If you prefer to run MongoDB **without authentication** for development purposes:
+
+### Step 1: Edit MongoDB Configuration
+```bash
+sudo nano /etc/mongod.conf
+```
+
+### Step 2: Find the Security Section
+Look for:
+```yaml
+security:
+  authorization: enabled
+```
+
+### Step 3: Disable Authentication
+Choose one option:
+
+**Option A (Recommended):** Comment it out
+```yaml
+#security:
+#  authorization: enabled
+```
+
+**Option B:** Explicitly disable
+```yaml
+security:
+  authorization: disabled
+```
+
+### Step 4: Save and Exit
+- Press `Ctrl + O` → `Enter` (save)
+- Press `Ctrl + X` (exit)
+
+### Step 5: Restart MongoDB
+```bash
+sudo systemctl restart mongod
+```
+
+> **⚠️ Warning**: Disabling authentication is only recommended for local development environments. Never disable authentication in production!
+
+## 📤📥 Database Export & Import Utility
+
+The project includes a utility script for database backup and restore operations:
+```bash
+# Make the script executable
 chmod +x db_ops.sh
+
+# Run the database operations menu
 ./db_ops.sh
+```
+
+This script provides options to:
+- Export database collections
+- Import database collections
+- Backup and restore data
+---
