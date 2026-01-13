@@ -6,6 +6,7 @@
 /* --- API Helper --- */
 const api = {
     async request(url, method = 'GET', data = null) {
+        console.log(`API Request: ${method} ${url}`);
         const options = {
             method,
             headers: {

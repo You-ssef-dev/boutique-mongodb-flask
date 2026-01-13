@@ -4,7 +4,7 @@ BoutiqueComplete1 - Flask Backend Application
 A complete REST API for an online shop management system.
 """
 
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, send_from_directory
 from pymongo import MongoClient
 from bson import ObjectId, json_util
 from datetime import datetime
@@ -71,6 +71,16 @@ def aggregation_page():
 def search_page():
     """Search and filter tests page."""
     return render_template('search.html')
+
+@app.route('/documentation')
+def documentation():
+    """Project documentation page."""
+    return send_from_directory('docs', 'index.html')
+
+@app.route('/docs/<path:filename>')
+def serve_docs(filename):
+    """Serve documentation static files."""
+    return send_from_directory('docs', filename)
 
 # ============================================================
 # API ROUTES - PRODUCTS (CRUD)

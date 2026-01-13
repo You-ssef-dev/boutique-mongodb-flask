@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation - BoutiqueComplete1</title>
+    <!-- Inline script to prevent FOUC -->
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/docs/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+
+<body>
+    <!-- Sidebar Navigation (Duplicated from App to maintain look) -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <span class="logo-icon"><i class='bx bxs-store'></i></span>
+                <span class="logo-text">Boutique<span class="accent">Complete</span></span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/" class="nav-link">
+                <span class="nav-icon"><i class='bx bxs-dashboard'></i></span>
+                <span>Dashboard</span>
+            </a>
+            <a href="/products" class="nav-link">
+                <span class="nav-icon"><i class='bx bxs-package'></i></span>
+                <span>Produits</span>
+            </a>
+            <a href="/orders" class="nav-link">
+                <span class="nav-icon"><i class='bx bxs-receipt'></i></span>
+                <span>Commandes</span>
+            </a>
+            <a href="/aggregation" class="nav-link">
+                <span class="nav-icon"><i class='bx bxs-chart'></i></span>
+                <span>Statistiques</span>
+            </a>
+            <a href="/search" class="nav-link">
+                <span class="nav-icon"><i class='bx bxs-search'></i></span>
+                <span>Recherche</span>
+            </a>
+            <a href="/documentation" class="nav-link active">
+                <span class="nav-icon"><i class='bx bxs-book-content'></i></span>
+                <span>Architecture</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="db-status">
+                <span class="status-dot"></span>
+                <span>MongoDB Connected</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="top-header">
+            <h1 class="page-title">Documentation Technique</h1>
+            <div class="header-actions">
+                <button id="theme-toggle" class="btn-icon" aria-label="Toggle Theme">
+                    <i class='bx bxs-moon'></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="content-area docs-wrapper">
+            <!-- Documentation Table of Contents -->
+            <nav class="docs-nav">
+                <ul>
+                    <li><a href="#vue-globale" class="active">1. Vue Globale</a></li>
+                    <li><a href="#architecture">2. Architecture</a></li>
+                    <li><a href="#communication">3. Communication</a></li>
+                    <li><a href="#flux">4. Flux d'Exécution</a></li>
+                    <li><a href="#donnees">5. Gestion des Données</a></li>
+                    <li><a href="#fichiers">6. Rôle des Fichiers</a></li>
+                    <li><a href="#technologies">7. Technologies</a></li>
+                    <li><a href="#logique">8. Logique Métier</a></li>
+                </ul>
+            </nav>
+
+            <!-- Documentation Content -->
+            <div class="docs-content">
+
+                <!-- 1. Vue Globale -->
+                <section id="vue-globale" class="doc-section">
+                    <h2><i class='bx bxs-planet'></i> 1. Vue Globale du Projet</h2>
+                    <p>Ce projet est une application de gestion de boutique en ligne (E-commerce) minimaliste mais
+                        complète. Il démontre comment construire une application web moderne avec une base de données
+                        NoSQL puissante.</p>
+
+                    <h3>🎯 Objectif</h3>
+                    <p>L'objectif est double :</p>
+                    <ul>
+                        <li><strong>Technique :</strong> Montrer l'intégration parfaite entre Python (Flask) et MongoDB.
+                        </li>
+                        <li><strong>Pédagogique :</strong> Servir de modèle "propre" pour apprendre le développement
+                            Fullstack.</li>
+                    </ul>
+
+                    <h3>👥 À quoi ça sert ?</h3>
+                    <p>L'application permet à un administrateur de boutique de :</p>
+                    <ul>
+                        <li>Gérer son catalogue (CRUD Produits).</li>
+                        <li>Gérer ses commandes clients (Embedding vs Linking).</li>
+                        <li>Voir des statistiques de vente en temps réel (Agrégations).</li>
+                    </ul>
+
+                    <h3>👋 Public Cible</h3>
+                    <p>Développeurs débutants à intermédiaires, étudiants, ou toute personne voulant comprendre comment
+                        une vraie application web fonctionne sous le capot sans la complexité des gros frameworks comme
+                        React/Angular.</p>
+                </section>
+
+                <!-- 2. Architecture -->
+                <section id="architecture" class="doc-section">
+                    <h2><i class='bx bxs-building-house'></i> 2. Architecture du Projet</h2>
+                    <p>L'architecture suit le modèle <strong>MVC (Modèle - Vue - Contrôleur)</strong> adapté à Flask.
+                    </p>
+
+                    <h3>📂 Arborescence</h3>
+                    <div class="file-tree">
+                        <div class="tree-item folder"><i class='bx bxs-folder'></i> boutique-mongodb-flask/</div>
+                        <div class="tree-item"><span style="margin-left: 20px;">├── 📄 app.py (Le Cerveau /
+                                Contrôleur)</span></div>
+                        <div class="tree-item folder"><span style="margin-left: 20px;">├── 📂 templates/ (Les Vues /
+                                HTML)</span></div>
+                        <div class="tree-item"><span style="margin-left: 40px;">│ ├── 📄 base.html</span></div>
+                        <div class="tree-item"><span style="margin-left: 40px;">│ ├── 📄 index.html</span></div>
+                        <div class="tree-item"><span style="margin-left: 40px;">│ ├── 📄 products.html</span></div>
+                        <div class="tree-item"><span style="margin-left: 40px;">│ └── ...</span></div>
+                        <div class="tree-item folder"><span style="margin-left: 20px;">├── 📂 static/ (Les
+                                Assets)</span></div>
+                        <div class="tree-item"><span style="margin-left: 40px;">│ ├── 📂 css/</span></div>
+                        <div class="tree-item"><span style="margin-left: 40px;">│ └── 📂 js/</span></div>
+                        <div class="tree-item folder"><span style="margin-left: 20px;">├── 📂 docs/ (La
+                                Documentation)</span></div>
+                        <div class="tree-item"><span style="margin-left: 20px;">├── 📄 db_init.py (Script
+                                d'initialisation)</span></div>
+                        <div class="tree-item"><span style="margin-left: 20px;">└── 📄 requirements.txt</span></div>
+                    </div>
+                </section>
+
+                <!-- 3. Communication -->
+                <section id="communication" class="doc-section">
+                    <h2><i class='bx bxs-network-chart'></i> 3. Communication entre les parties</h2>
+
+                    <h3>Frontend ↔ Backend</h3>
+                    <p>Le dialogue se fait via <strong>HTTP</strong> et <strong>JSON</strong>.</p>
+                    <div class="code-block-wrapper">
+                        <div class="code-header">
+                            <span class="lang-badge">Flux de Données</span>
+                        </div>
+                        <pre><code>Navigateur (JS)  ----(Requete JSON)--->  Flask (Python)
+Navigateur       <---(Reponse JSON)----  Flask</code></pre>
+                    </div>
+                    <p>Le Frontend ne parle <strong>jamais</strong> directement à la base de données. Il demande
+                        poliment au Backend de le faire.</p>
+
+                    <h3>Python ↔ MongoDB</h3>
+                    <p>Python utilise le driver <code>pymongo</code> pour envoyer des ordres à la base de données via le
+                        protocole TCP (Port 27017).</p>
+                </section>
+
+                <!-- 4. Flux -->
+                <section id="flux" class="doc-section">
+                    <h2><i class='bx bx-run'></i> 4. Flux d’Exécution</h2>
+
+                    <h3>🚀 Démarrage</h3>
+                    <ol>
+                        <li>Lancement de <code>python app.py</code>.</li>
+                        <li>Flask initialise la connexion MongoDB.</li>
+                        <li>Le serveur écoute sur le port 5000.</li>
+                    </ol>
+
+                    <h3>🔄 Cycle de Vie d'une Requête</h3>
+                    <p>Prenons l'affichage de la liste des produits :</p>
+                    <ol>
+                        <li>L'utilisateur va sur <code>/products</code>.</li>
+                        <li>Flask renvoie le fichier HTML <code>products.html</code>.</li>
+                        <li>Le navigateur lit le HTML et voit une balise <code>&lt;script&gt;</code>.</li>
+                        <li>Le JavaScript s'exécute et fait un appel <code>fetch('/api/products')</code>.</li>
+                        <li>Flask reçoit cette demande, interroge MongoDB, et renvoie le JSON.</li>
+                        <li>Le JavaScript reçoit le JSON et dessine le tableau HTML.</li>
+                    </ol>
+                </section>
+
+                <!-- 5. Données -->
+                <section id="donnees" class="doc-section">
+                    <h2><i class='bx bxs-data'></i> 5. Gestion des Données</h2>
+
+                    <h3>Stockage</h3>
+                    <p>Les données sont stockées non pas dans des tables (comme SQL), mais dans des
+                        <strong>Collections</strong> de <strong>Documents JSON</strong> (BSON).
+                    </p>
+
+                    <h3>Collections Principales</h3>
+                    <ul>
+                        <li><strong>Produits</strong> : Le catalogue magasin.</li>
+                        <li><strong>CommandesEmbedding</strong> : Commandes tout-en-un (panier inclus). Rapide à lire.
+                        </li>
+                        <li><strong>CommandesLinking</strong> : Commandes par référence. Mieux pour la cohérence des
+                            données.</li>
+                        <li><strong>Clients</strong> : Liste des acheteurs.</li>
+                    </ul>
+
+                    <h3>💡 Types de Données</h3>
+                    <div class="tech-grid">
+                        <div class="tech-card" style="padding: 1rem;">
+                            <strong>String</strong><br><small>Noms, Desc</small>
+                        </div>
+                        <div class="tech-card" style="padding: 1rem;">
+                            <strong>Number</strong><br><small>Prix, Stock</small>
+                        </div>
+                        <div class="tech-card" style="padding: 1rem;">
+                            <strong>Array</strong><br><small>Tags, Listes</small>
+                        </div>
+                        <div class="tech-card" style="padding: 1rem;">
+                            <strong>ObjectId</strong><br><small>ID Unique</small>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 6. Fichiers -->
+                <section id="fichiers" class="doc-section">
+                    <h2><i class='bx bxs-file-doc'></i> 6. Rôle des Fichiers</h2>
+
+                    <h3><code>app.py</code></h3>
+                    <p>Le chef d'orchestre (Contrôleur). Il contient toutes les routes serveurs (`@app.route`), la
+                        logique d'API REST, et assure la validation des données reçues avant de les confier à MongoDB.
+                    </p>
+
+                    <h3><code>db_init.py</code></h3>
+                    <p>L'Initialisateur. Il construit les fondations de la base de données en injectant un jeu de
+                        données initial complet, indispensable pour tester l'affichage et les fonctionnalités dès le
+                        démarrage.</p>
+
+                    <h3><code>db_ops.sh</code></h3>
+                    <p>Le logisticien. Un script Bash pour sauvegarder (Export) et restaurer (Import) toutes les données
+                        de la base en JSON.</p>
+
+                    <h3><code>static/js/main.js</code></h3>
+                    <p>Le moteur interactif Frontend. Il gère la communication asynchrone avec le Backend (via
+                        <code>fetch</code>), affiche les notifications (Toasts), contrôle le thème (Clair/Sombre) et
+                        gère les modales.</p>
+
+                    <h3><code>templates/</code></h3>
+                    <p>Les Vues (HTML/Jinja2). Ce sont les squelettes des pages qui définissent la structure visuelle,
+                        héritant toutes du modèle maître <code>base.html</code> pour une cohérence graphique parfaite.
+                    </p>
+                </section>
+
+                <!-- 7. Technologies -->
+                <section id="technologies" class="doc-section">
+                    <h2><i class='bx bxs-microchip'></i> 7. Technologies Utilisées</h2>
+                    <div class="tech-grid">
+                        <div class="tech-card">
+                            <i class='bx bxl-python tech-icon'></i>
+                            <div class="tech-name">Python & Flask</div>
+                            <div class="tech-desc">Le langage Backend et son framework web léger.</div>
+                        </div>
+                        <div class="tech-card">
+                            <i class='bx bxl-mongodb tech-icon'></i>
+                            <div class="tech-name">MongoDB</div>
+                            <div class="tech-desc">La base de données NoSQL flexible et performante.</div>
+                        </div>
+                        <div class="tech-card">
+                            <i class='bx bxl-html5 tech-icon'></i>
+                            <div class="tech-name">HTML5 & CSS3</div>
+                            <div class="tech-desc">La structure et le style moderne de l'interface.</div>
+                        </div>
+                        <div class="tech-card">
+                            <i class='bx bxl-javascript tech-icon'></i>
+                            <div class="tech-name">JavaScript</div>
+                            <div class="tech-desc">La logique Frontend pour l'interactivité.</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 8. Logique Métier -->
+                <section id="logique" class="doc-section">
+                    <h2><i class='bx bxs-brain'></i> 8. Logique Métier</h2>
+
+                    <h3>Fonctionnement Fonctionnel</h3>
+                    <p>L'application gère le cycle de vie complet d'un produit :</p>
+                    <ol>
+                        <li><strong>Entrée en stock :</strong> Création via le formulaire "Nouveau Produit".</li>
+                        <li><strong>Mise en vente :</strong> Le produit apparaît dans le catalogue.</li>
+                        <li><strong>Vente :</strong> Lorsqu'une commande est créée, les statistiques de vente sont mises
+                            à jour.</li>
+                        <li><strong>Gestion :</strong> Modification des prix ou suppression en cas de rupture
+                            définitive.</li>
+                    </ol>
+
+                    <h3>Cas d'Usage : Le Panier</h3>
+                    <p>Quand une commande est passée :</p>
+                    <ul>
+                        <li>On vérifie (théoriquement) le stock.</li>
+                        <li>On calcule le total (Prix x Quantité).</li>
+                        <li>On crée un document Commande.</li>
+                        <li>On met à jour les tableaux de bord.</li>
+                    </ul>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="/static/js/main.js"></script>
+    <script src="/docs/script.js"></script>
+</body>
+
+</html>
