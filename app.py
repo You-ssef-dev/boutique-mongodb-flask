@@ -858,6 +858,71 @@ def demo_operators():
     elif operator == '$where':
         expression = params.get('expression', 'this.prix * this.stock > 1000')
         query['$where'] = expression
+
+    # --- Update Operators ---
+    elif operator in ['$set', '$unset', '$rename', '$currentDate', '$push', '$addToSet', '$pop', '$pull']:
+        # For demo purposes, we'll update ALL documents that match a basic filter (or all if none)
+        # But to be safe and clear, let's target specific items or generic filter if provided
+        # For this demo, let's update everything so the user sees the effect immediately on the list
+        filter_query = {} 
+        update_query = {}
+
+        if operator == '$set':
+            field = params.get('field', 'prix')
+            value = params.get('value', 100)
+            update_query['$set'] = {field: value}
+
+        elif operator == '$unset':
+            field = params.get('field', 'details')
+            update_query['$unset'] = {field: ""}
+
+        elif operator == '$rename':
+            field = params.get('field', 'oldName')
+            new_name = params.get('newName', 'newName')
+            update_query['$rename'] = {field: new_name}
+
+        elif operator == '$currentDate':
+            field = params.get('field', 'lastModified')
+            type_val = params.get('type', 'date') # or timestamp
+            update_query['$currentDate'] = {field: {'$type': type_val}}
+
+        # --- Array Operators ---
+        elif operator == '$push':
+            field = params.get('field', 'tags')
+            value = params.get('value', 'nouveau')
+            update_query['$push'] = {field: value}
+
+        elif operator == '$addToSet':
+            field = params.get('field', 'tags')
+            value = params.get('value', 'unique')
+            update_query['$addToSet'] = {field: value}
+
+        elif operator == '$pop':
+            field = params.get('field', 'tags')
+            # 1 for last, -1 for first. Frontend should send number or we parse it
+            value = int(params.get('value', 1)) 
+            update_query['$pop'] = {field: value}
+
+        elif operator == '$pull':
+            field = params.get('field', 'tags')
+            value = params.get('value', 'outdated')
+            update_query['$pull'] = {field: value}
+
+        # Execute Update
+        result = db.Produits.update_many(filter_query, update_query)
+        
+        # return all docs to see changes
+        results = list(db.Produits.find({}))
+        
+        return jsonify({
+            'success': True,
+            'operator': operator,
+            'query': json.loads(json_util.dumps(update_query)),
+            'count': len(results),
+            'modified_count': result.modified_count,
+            'data': serialize_doc(results)
+        })
+
     else:
         return jsonify({'success': False, 'error': f'Unknown operator: {operator}'}), 400
     
