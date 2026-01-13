@@ -11,6 +11,9 @@ DB_NAME="BoutiqueComplete1"
 EXPORT_DIR="./exports"
 DATE=$(date +%F)
 
+# Authentication Details
+AUTH_URI="mongodb://boutiqueUser:BoutiquePass2024!@localhost:27017/BoutiqueComplete1?authSource=BoutiqueComplete1"
+
 # Create export directory if not exists
 mkdir -p $EXPORT_DIR
 
@@ -34,19 +37,19 @@ echo "--- EXPORT OPERATIONS ---"
 echo ""
 
 echo "📤 Exporting Produits to JSON..."
-mongoexport --db=$DB_NAME --collection=Produits --out=$EXPORT_DIR/produits_$DATE.json --jsonArray
+mongoexport --uri="$AUTH_URI" --collection=Produits --out=$EXPORT_DIR/produits_$DATE.json --jsonArray
 echo "   ✅ Exported to $EXPORT_DIR/produits_$DATE.json"
 
 echo "📤 Exporting Clients to JSON..."
-mongoexport --db=$DB_NAME --collection=Clients --out=$EXPORT_DIR/clients_$DATE.json --jsonArray
+mongoexport --uri="$AUTH_URI" --collection=Clients --out=$EXPORT_DIR/clients_$DATE.json --jsonArray
 echo "   ✅ Exported to $EXPORT_DIR/clients_$DATE.json"
 
 echo "📤 Exporting CommandesEmbedding to JSON..."
-mongoexport --db=$DB_NAME --collection=CommandesEmbedding --out=$EXPORT_DIR/commandes_embedding_$DATE.json --jsonArray
+mongoexport --uri="$AUTH_URI" --collection=CommandesEmbedding --out=$EXPORT_DIR/commandes_embedding_$DATE.json --jsonArray
 echo "   ✅ Exported to $EXPORT_DIR/commandes_embedding_$DATE.json"
 
 echo "📤 Exporting CommandesLinking to JSON..."
-mongoexport --db=$DB_NAME --collection=CommandesLinking --out=$EXPORT_DIR/commandes_linking_$DATE.json --jsonArray
+mongoexport --uri="$AUTH_URI" --collection=CommandesLinking --out=$EXPORT_DIR/commandes_linking_$DATE.json --jsonArray
 echo "   ✅ Exported to $EXPORT_DIR/commandes_linking_$DATE.json"
 
 echo ""
@@ -64,10 +67,10 @@ echo "--- IMPORT OPERATIONS ---"
 echo "⚠️ Warning: existing collections will be DROPPED before restore"
 echo ""
 
-mongoimport --db=$DB_NAME --collection=Produits --file=$EXPORT_DIR/produits_$DATE.json --jsonArray --drop
-mongoimport --db=$DB_NAME --collection=Clients --file=$EXPORT_DIR/clients_$DATE.json --jsonArray --drop
-mongoimport --db=$DB_NAME --collection=CommandesEmbedding --file=$EXPORT_DIR/commandes_embedding_$DATE.json --jsonArray --drop
-mongoimport --db=$DB_NAME --collection=CommandesLinking --file=$EXPORT_DIR/commandes_linking_$DATE.json --jsonArray --drop
+mongoimport --uri="$AUTH_URI" --collection=Produits --file=$EXPORT_DIR/produits_$DATE.json --jsonArray --drop
+mongoimport --uri="$AUTH_URI" --collection=Clients --file=$EXPORT_DIR/clients_$DATE.json --jsonArray --drop
+mongoimport --uri="$AUTH_URI" --collection=CommandesEmbedding --file=$EXPORT_DIR/commandes_embedding_$DATE.json --jsonArray --drop
+mongoimport --uri="$AUTH_URI" --collection=CommandesLinking --file=$EXPORT_DIR/commandes_linking_$DATE.json --jsonArray --drop
 
 echo ""
 echo "========================================"

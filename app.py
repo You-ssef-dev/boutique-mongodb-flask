@@ -15,7 +15,7 @@ app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 
 # --- MongoDB Configuration ---
-MONGO_URI = "mongodb://localhost:27017/"
+MONGO_URI = "mongodb://boutiqueUser:BoutiquePass2024!@localhost:27017/BoutiqueComplete1?authSource=BoutiqueComplete1"
 DATABASE_NAME = "BoutiqueComplete1"
 
 def get_db():
@@ -703,8 +703,15 @@ def sales_by_category():
     # Aggregation on embedded orders
     pipeline = [
         {'$unwind': '$produits'},
+        {'$lookup': {
+            'from': 'Produits',
+            'localField': 'produits.nom',
+            'foreignField': 'nom',
+            'as': 'details_produit'
+        }},
+        {'$unwind': '$details_produit'},
         {'$group': {
-            '_id': None,
+            '_id': '$details_produit.categorie',
             'total_ventes': {'$sum': {'$multiply': ['$produits.prix', '$produits.quantite']}},
             'nombre_articles': {'$sum': '$produits.quantite'}
         }}
