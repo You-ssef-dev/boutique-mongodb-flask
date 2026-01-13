@@ -1,0 +1,255 @@
+/* Docs Specific Styles */
+:root {
+    --doc-sidebar-width: 280px;
+    --doc-content-max-width: 1000px;
+}
+
+/* Layout overrides for docs page if needed, 
+   though we aim to reuse main css as much as possible */
+
+.docs-wrapper {
+    display: flex;
+    gap: 2rem;
+    position: relative;
+    align-items: flex-start;
+}
+
+/* Documentation Navigation (Table of Contents) */
+.docs-nav {
+    width: var(--doc-sidebar-width);
+    position: sticky;
+    top: 2rem;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+    padding-right: 1rem;
+    font-size: 0.95rem;
+    border-right: 1px solid var(--border-color);
+}
+
+.docs-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.docs-nav li {
+    margin-bottom: 0.5rem;
+}
+
+.docs-nav a {
+    text-decoration: none;
+    color: var(--text-secondary);
+    display: block;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+    border-left: 3px solid transparent;
+}
+
+.docs-nav a:hover,
+.docs-nav a.active {
+    color: var(--primary-color);
+    background: var(--bg-secondary);
+    border-left-color: var(--primary-color);
+}
+
+.docs-nav .sub-link {
+    padding-left: 2rem;
+    font-size: 0.9rem;
+}
+
+/* Documentation Content Area */
+.docs-content {
+    flex: 1;
+    min-width: 0;
+    /* Prevent flex overflow */
+}
+
+.doc-section {
+    margin-bottom: 4rem;
+    scroll-margin-top: 100px;
+    /* Header offset */
+    animation: fadeIn 0.5s ease-out;
+}
+
+.doc-section h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.doc-section h2 i {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+}
+
+.doc-section h3 {
+    font-size: 1.4rem;
+    margin: 2rem 0 1rem;
+    color: var(--text-primary);
+}
+
+.doc-section p {
+    line-height: 1.7;
+    margin-bottom: 1rem;
+    color: var(--text-secondary);
+}
+
+/* Enhanced Code Blocks */
+.code-block-wrapper {
+    margin: 1.5rem 0;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: #1e1e2e;
+    /* Dark theme by default for code */
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+}
+
+.code-header {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.5rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.lang-badge {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: #a6accd;
+    font-weight: 600;
+}
+
+.copy-btn {
+    background: transparent;
+    border: none;
+    color: #a6accd;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0.2rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.copy-btn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+pre {
+    margin: 0;
+    padding: 1rem;
+    overflow-x: auto;
+}
+
+code {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9rem;
+    color: #e0e0e0;
+}
+
+/* Inline Code */
+p code {
+    background: var(--bg-secondary);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9em;
+    color: var(--primary-color);
+}
+
+/* Feature Cards / Tech Stack */
+.tech-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.tech-card {
+    background: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    text-align: center;
+    transition: transform 0.2s;
+}
+
+.tech-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary-color);
+}
+
+.tech-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+}
+
+.tech-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.tech-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* Diagram / File Tree */
+.file-tree {
+    background: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.tree-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tree-item.folder {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .docs-wrapper {
+        flex-direction: column;
+    }
+
+    .docs-nav {
+        width: 100%;
+        position: static;
+        margin-bottom: 2rem;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        max-height: 300px;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

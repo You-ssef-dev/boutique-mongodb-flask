@@ -2752,48 +2752,94 @@ select option:checked {
     border-radius: var(--radius-full);
 }
 
+/* Operator Card Body */
+/* Operator Card Body */
 .op-body {
-    flex: 1;
+    /* Removed padding per user request */
     display: flex;
     flex-direction: column;
+    flex-grow: 1;
 }
 
 .op-body label {
     display: block;
     margin-bottom: var(--space-2);
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: var(--text-muted);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
 }
 
 .op-body .input-group {
     display: flex;
-    gap: var(--space-2);
-    margin-bottom: var(--space-5);
-    background: var(--bg-input);
-    padding: 4px;
-    border-radius: var(--radius-lg);
+    align-items: center;
+    /* FIXED: Ensure vertical alignment */
+    width: 100%;
+    margin-bottom: 0;
     border: 1px solid var(--border-light);
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: border-color var(--transition-base);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--bg-input);
+    transition: border-color var(--transition-fast);
 }
 
 .op-body .input-group:focus-within {
-    border-color: var(--color-accent);
-    box-shadow: 0 0 0 2px var(--color-accent-light);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.1);
+}
+
+.input-prefix {
+    padding: 0 var(--space-3);
+    background: rgba(255, 255, 255, 0.03);
+    border-right: 1px solid var(--border-light);
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 500;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    /* Ensure full height */
+    min-height: 38px;
+    /* Match input height */
+}
+
+.input-suffix {
+    padding: 0 var(--space-3);
+    background: rgba(255, 255, 255, 0.03);
+    border-left: 1px solid var(--border-light);
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    display: flex;
+    /* FIXED: Added flex */
+    align-items: center;
+    /* FIXED: Added vertical centering */
+    height: 100%;
+    /* FIXED: Full height */
+    min-height: 38px;
+}
+
+.op-body .input-group button.btn {
+    /* Styles for buttons INSIDE input-group */
+    margin: 0;
+    border-radius: 0;
+    height: 100%;
+    min-height: 38px;
+    border: none;
+    border-left: 1px solid var(--border-light);
 }
 
 .op-body input[type="text"],
-.op-body input[type="number"] {
+.op-body input[type="number"],
+.op-body select {
     flex: 1;
-    background: transparent;
     border: none;
-    color: var(--text-primary);
+    background: transparent;
     padding: var(--space-2) var(--space-3);
-    font-family: inherit;
-    font-size: 0.9rem;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    width: 100%;
+    outline: none;
+    height: 38px;
+    /* Fixed height for consistency */
 }
 
 .op-body input:focus {
@@ -3618,4 +3664,505 @@ select option:checked {
 
 [data-theme="light"] *:hover {
     scrollbar-color: rgba(6, 182, 212, 0.6) transparent;
+}
+
+/* ========================================
+   LOGIC BUILDER ($or Operator)
+   ======================================== */
+.logic-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+}
+
+.logic-item {
+    background: var(--bg-hover);
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-light);
+}
+
+.mini-label {
+    display: block;
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    margin-bottom: var(--space-2);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+
+.logic-separator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    height: 24px;
+    margin: var(--space-1) 0;
+}
+
+.logic-separator::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-light), transparent);
+    z-index: 1;
+}
+
+.logic-separator span {
+    position: relative;
+    z-index: 2;
+    background: var(--bg-card);
+    color: var(--color-accent);
+    padding: 2px 12px;
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Override existing .input-group for logic items */
+/* We target specific structure in .logic-group */
+.logic-group .input-group {
+    padding: 0;
+    gap: 0;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--bg-input);
+    border: 1px solid var(--border-light);
+}
+
+.logic-group .input-prefix {
+    padding: 0 var(--space-3);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+    display: flex;
+    align-items: center;
+    border-right: 1px solid var(--border-light);
+    white-space: nowrap;
+}
+
+.logic-group .input-suffix {
+    padding: 0 var(--space-3);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+    display: flex;
+    align-items: center;
+    border-left: 1px solid var(--border-light);
+}
+
+.logic-group input {
+    height: 38px;
+    /* Fixed height for alignment */
+    padding: var(--space-2) var(--space-3) !important;
+}
+
+/* Light Mode Overrides for Logic Builder */
+[data-theme="light"] .logic-item {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .logic-separator span {
+    background: #ffffff;
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .logic-group .input-prefix,
+[data-theme="light"] .logic-group .input-suffix {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+/* ========================================
+   PILLS ($in Operator)
+   ========================================*/
+/* Pill Container & Actions ($in) */
+.pill-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: 0.85rem;
+}
+
+.pill-actions .btn-text {
+    background: none;
+    border: none;
+    color: var(--color-accent);
+    cursor: pointer;
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+}
+
+.pill-actions .btn-text:hover {
+    background: rgba(var(--color-primary-rgb), 0.1);
+}
+
+.pill-actions .sep {
+    color: var(--border-light);
+}
+
+.pills-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    /* FIXED: Added gap between pills */
+    margin-top: var(--space-3);
+    /* FIXED: Added margin from header */
+}
+
+.pill-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 6px 12px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-full);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    /* slightly smaller for pills */
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.pill-btn i {
+    font-size: 1.1em;
+    color: var(--text-muted);
+}
+
+.pill-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    transform: translateY(-1px);
+}
+
+.pill-btn.active {
+    background: rgba(6, 182, 212, 0.15);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
+}
+
+.pill-btn.active i {
+    color: var(--color-accent);
+}
+
+/* Light Mode Pills */
+[data-theme="light"] .pill-btn {
+    background: white;
+    box-shadow: var(--shadow-sm);
+}
+
+[data-theme="light"] .pill-btn:hover {
+    background: #f8fafc;
+}
+
+[data-theme="light"] .pill-btn.active {
+    background: #ecfeff;
+    /* Cyan-50 */
+}
+
+
+/* ========================================
+   CODE EDITOR ($where Operator)
+   ======================================== */
+.code-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.code-label i {
+    color: #f7df1e;
+    /* JS Yellow */
+    font-size: 1.2rem;
+}
+
+.code-editor {
+    display: flex;
+    background: #1e1e1e;
+    /* VS Code dark bg */
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    font-family: 'Fira Code', monospace;
+    border: 1px solid var(--border-light);
+}
+
+.line-numbers {
+    padding: var(--space-3) var(--space-2);
+    background: #252526;
+    color: #858585;
+    font-size: 13px;
+    text-align: right;
+    min-width: 32px;
+    user-select: none;
+    border-right: 1px solid #333;
+}
+
+.code-textarea {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #d4d4d4;
+    /* Text color */
+    padding: var(--space-3);
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.5;
+    resize: none;
+    outline: none;
+}
+
+/* Light Mode Editor adjust if needed, but keeping dark theme for "Code" feels pro */
+[data-theme="light"] .code-editor {
+    box-shadow: var(--shadow-md);
+}
+
+/* ========================================
+   UTILITIES
+   ======================================== */
+.mt-1 {
+    margin-top: var(--space-2) !important;
+}
+
+.mt-2 {
+    margin-top: var(--space-3) !important;
+}
+
+.mt-3 {
+    margin-top: var(--space-4) !important;
+}
+
+.mt-4 {
+    margin-top: var(--space-5) !important;
+}
+
+.mt-5 {
+    margin-top: var(--space-6) !important;
+}
+
+/* ========================================
+   LAYOUT BALANCING ($or, $where, $in)
+   ======================================== */
+
+/* ========================================
+   LAYOUT BALANCING ($or, $where, $in)
+   ======================================== */
+
+/* Vertical Logic Stack ($or) */
+.logic-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background: var(--bg-hover);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-light);
+}
+
+.logic-stack .input-group {
+    width: 100%;
+    margin-bottom: 0;
+    background: var(--bg-input);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+}
+
+.logic-stack .input-prefix {
+    padding: 0 var(--space-3);
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    border-right: 1px solid var(--border-light);
+    height: 100%;
+    min-width: 90px;
+}
+
+.logic-stack input {
+    width: 100%;
+    border: none !important;
+    background: transparent !important;
+    height: 38px;
+    padding: 0 var(--space-3);
+}
+
+/* Horizontal Separator within Stack */
+.logic-separator.horizontal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    height: 24px;
+    width: 100%;
+}
+
+.logic-separator.horizontal::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-light), transparent);
+    z-index: 0;
+}
+
+.logic-separator.horizontal span {
+    position: relative;
+    z-index: 1;
+    background: var(--bg-hover);
+    /* Match container bg */
+    padding: 2px 8px;
+    font-size: 11px;
+    color: var(--color-accent);
+    font-weight: 700;
+    text-transform: uppercase;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-full);
+}
+
+/* Premium Segmented Control ($pop) */
+.segmented-control {
+    display: flex;
+    background: var(--bg-input);
+    padding: 4px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-light);
+    gap: 4px;
+}
+
+.segment-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+}
+
+.segment-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.segment-btn.active {
+    background: var(--bg-card);
+    /* or accent color depending on taste */
+    color: var(--color-accent);
+    box-shadow: var(--shadow-sm);
+    font-weight: 600;
+}
+
+/* Expanded Code Editor ($where) */
+.code-editor.expanded {
+    min-height: 90px;
+}
+
+/* Tip Box ($where alternative) */
+.tip-box {
+    background: rgba(245, 158, 11, 0.1);
+    /* Amber tint */
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.tip-box .tip-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: #f59e0b;
+    /* Amber-500 */
+    font-weight: 600;
+    margin-bottom: var(--space-1);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.tip-box .mini-code {
+    display: block;
+    margin-top: var(--space-2);
+    background: rgba(0, 0, 0, 0.2);
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    font-family: 'Fira Code', monospace;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    word-break: break-all;
+}
+
+[data-theme="light"] .tip-box .mini-code {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--text-primary);
+}
+
+.code-editor.expanded .line-numbers {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: var(--space-3);
+    gap: 2px;
+    /* Line height rhythm */
+}
+
+.code-editor.expanded .line-numbers span {
+    display: block;
+    line-height: 1.5;
+}
+
+/* Pill Actions */
+.pill-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--font-size-xs);
+}
+
+.btn-text {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--color-accent);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity var(--transition-fast);
+}
+
+.btn-text:hover {
+    text-decoration: underline;
+    opacity: 0.8;
+}
+
+.pill-actions .sep {
+    color: var(--border-light);
 }

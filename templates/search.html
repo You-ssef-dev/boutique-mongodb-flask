@@ -72,14 +72,29 @@
                         <span class="badge">$in</span>
                     </div>
                     <div class="op-body">
-                        <label>Catégories:</label>
-                        <div class="checkbox-group">
-                            <label><input type="checkbox" class="in-check" value="Vêtements" checked> Vêtements</label>
-                            <label><input type="checkbox" class="in-check" value="Chaussures"> Chaussures</label>
-                            <label><input type="checkbox" class="in-check" value="Accessoires" checked>
-                                Accessoires</label>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="mb-0">Sélectionnez les catégories:</label>
+                            <div class="pill-actions">
+                                <button type="button" class="btn-text" onclick="togglePills(true)">Tout</button>
+                                <span class="sep">|</span>
+                                <button type="button" class="btn-text" onclick="togglePills(false)">Aucun</button>
+                            </div>
                         </div>
-                        <button class="btn btn-sm btn-primary" onclick="testOperator('$in')">Tester</button>
+                        <div class="pills-container" id="in-pills-container">
+                            <button type="button" class="pill-btn active" data-value="Vêtements">
+                                <i class='bx bx-closet'></i> Vêtements
+                            </button>
+                            <button type="button" class="pill-btn" data-value="Chaussures">
+                                <i class='bx bx-walk'></i> Chaussures
+                            </button>
+                            <button type="button" class="pill-btn active" data-value="Accessoires">
+                                <i class='bx bx-glasses'></i> Accessoires
+                            </button>
+                        </div>
+                        <button class="btn btn-sm btn-primary mt-4" onclick="testOperator('$in')">Tester</button>
+                        <div class="op-query mt-3">
+                            <code>{"categorie": {"$in": <span id="in-display">["Vêtements", "Accessoires"]</span>}}</code>
+                        </div>
                     </div>
                 </div>
 
@@ -90,9 +105,28 @@
                         <span class="badge">$or</span>
                     </div>
                     <div class="op-body">
-                        <p>Catégorie = Chaussures <br><strong>OU</strong><br> Prix &lt; 50€</p>
-                        <button type="button" class="btn btn-sm btn-primary"
+                        <div class="logic-stack">
+                            <div class="input-group">
+                                <span class="input-prefix">Catégorie</span>
+                                <input type="text" id="or-cat-value" value="Chaussures" placeholder="ex: Chaussures">
+                            </div>
+
+                            <div class="logic-separator horizontal">
+                                <span>OU</span>
+                            </div>
+
+                            <div class="input-group">
+                                <span class="input-prefix">Prix &lt;</span>
+                                <input type="number" id="or-price-value" value="50">
+                                <span class="input-suffix">€</span>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-primary mt-4"
                             onclick="testOperator('$or')">Tester</button>
+
+                        <div class="op-query mt-3">
+                            <code>{"$or": [{"categorie": "<span id="or-cat-display">Chaussures</span>"}, {"prix": {"$lt": <span id="or-price-display">50</span>}}]}</code>
+                        </div>
                     </div>
                 </div>
 
@@ -103,11 +137,203 @@
                         <span class="badge">$where</span>
                     </div>
                     <div class="op-body">
-                        <label>Expression JS:</label>
-                        <input type="text" id="where-value" value="this.prix * this.stock > 2000" class="code-input">
-                        <p class="tiny-text">Produits dont la valeur du stock > 2000</p>
-                        <button type="button" class="btn btn-sm btn-primary"
+                        <label class="code-label"><i class='bx bxl-javascript'></i> JavaScript Condition</label>
+                        <div class="code-editor expanded">
+                            <div class="line-numbers">
+                                <span>1</span>
+                                <span>2</span>
+                                <span>3</span>
+                            </div>
+                            <textarea id="where-value" class="code-textarea" rows="3"
+                                spellcheck="false">this.prix * this.stock > 2000</textarea>
+                        </div>
+                        <p class="tiny-text mt-1"><i class='bx bx-info-circle'></i> Produits dont la valeur du stock >
+                            2000</p>
+                        <button type="button" class="btn btn-sm btn-primary mt-4"
                             onclick="testOperator('$where')">Tester</button>
+                        <div class="op-query mt-3">
+                            <code>{"$where": "<span id="where-display">this.prix * this.stock > 2000</span>"}</code>
+                        </div>
+
+                        <!-- Conseil Alternative -->
+                        <div class="tip-box mt-3">
+                            <div class="tip-header">
+                                <i class='bx bx-bulb'></i> Conseil Pro
+                            </div>
+                            <p>Utilisez <code>$expr</code> pour de meilleures performances :</p>
+                            <code
+                                class="mini-code">{"$expr": {"$gt": [{"$multiply": ["$prix", "$stock"]}, 2000]}}</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Update Operators Section -->
+            <div class="section-divider mt-5 mb-4">
+                <h3><i class='bx bx-edit-alt'></i> Mises à jour</h3>
+            </div>
+            <div class="operators-grid">
+                <!-- $set Operator -->
+                <div class="operator-card">
+                    <div class="op-header">
+                        <h3>$set (Modifier)</h3>
+                        <span class="badge">$set</span>
+                    </div>
+                    <div class="op-body">
+                        <div class="input-group">
+                            <span class="input-prefix"><i class='bx bx-purchase-tag-alt'></i> Prix =</span>
+                            <input type="number" id="set-value" value="99">
+                        </div>
+                        <button class="btn btn-sm btn-primary mt-4" onclick="testOperator('$set')">Appliquer</button>
+                        <div class="op-query mt-3"><code>{"$set": {"prix": <span id="set-display">99</span>}}</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- $unset Operator -->
+                <div class="operator-card">
+                    <div class="op-header">
+                        <h3>$unset (Supprimer Champ)</h3>
+                        <span class="badge">$unset</span>
+                    </div>
+                    <div class="op-body">
+                        <div class="input-group">
+                            <span class="input-prefix"><i class='bx bx-x-circle'></i> Champ</span>
+                            <input type="text" id="unset-field" value="details">
+                        </div>
+                        <button class="btn btn-sm btn-primary mt-4" onclick="testOperator('$unset')">Appliquer</button>
+                        <div class="op-query mt-3">
+                            <code>{"$unset": {"<span id="unset-display">details</span>": ""}}</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- $rename Operator -->
+                <div class="operator-card">
+                    <div class="op-header">
+                        <h3>$rename (Renommer)</h3>
+                        <span class="badge">$rename</span>
+                    </div>
+                    <div class="op-body">
+                        <div class="logic-stack">
+                            <div class="input-group">
+                                <span class="input-prefix"><i class='bx bx-text'></i> De</span>
+                                <input type="text" id="rename-old" value="oldName">
+                            </div>
+                            <div class="logic-separator horizontal">
+                                <span>VERS</span>
+                            </div>
+                            <div class="input-group">
+                                <span class="input-prefix"><i class='bx bx-edit'></i> Vers</span>
+                                <input type="text" id="rename-new" value="newName">
+                            </div>
+                        </div>
+                        <button class="btn btn-sm btn-primary mt-4" onclick="testOperator('$rename')">Appliquer</button>
+                        <div class="op-query mt-3">
+                            <code>{"$rename": {"<span id="rename-display">oldName</span>": "..."}}</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- $currentDate Operator -->
+                <div class="operator-card">
+                    <div class="op-header">
+                        <h3>$currentDate (Date)</h3>
+                        <span class="badge">$currentDate</span>
+                    </div>
+                    <div class="op-body">
+                        <div class="input-group">
+                            <span class="input-prefix"><i class='bx bx-calendar'></i> Champ</span>
+                            <input type="text" id="date-field" value="lastModified">
+                        </div>
+                        <button class="btn btn-sm btn-primary mt-4"
+                            onclick="testOperator('$currentDate')">Appliquer</button>
+                        <div class="op-query mt-3">
+                            <code>{"$currentDate": {"<span id="date-display">lastModified</span>": {"$type": "date"}}}</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Array Operators Section -->
+            <div class="section-divider mt-5 mb-4">
+                <h3><i class='bx bx-list-plus'></i> Tableaux (Tags)</h3>
+            </div>
+            <div class="operators-grid">
+                <!-- $push Operator -->
+                <div class="operator-card">
+                    <div class="op-header">
+                        <h3>$push (Ajouter)</h3>
+                        <span class="badge">$push</span>
+                    </div>
+                    <div class="op-body">
+                        <div class="input-group">
+                            <span class="input-prefix"><i class='bx bx-plus'></i> Tag</span>
+                            <input type="text" id="push-value" value="nouveau">
+                        </div>
+                        <button class="btn btn-sm btn-primary mt-4" onclick="testOperator('$push')">Appliquer</button>
+                        <div class="op-query mt-3">
+                            <code>{"$push": {"tags": "<span id="push-display">nouveau</span>"}}</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- $addToSet Operator -->
+                <div class="operator-card">
+                    <div class="op-header">
+                        <h3>$addToSet (Unique)</h3>
+                        <span class="badge">$addToSet</span>
+                    </div>
+                    <div class="op-body">
+                        <div class="input-group">
+                            <span class="input-prefix"><i class='bx bx-hash'></i> Tag</span>
+                            <input type="text" id="addtoset-value" value="unique">
+                        </div>
+                        <button class="btn btn-sm btn-primary mt-4"
+                            onclick="testOperator('$addToSet')">Appliquer</button>
+                        <div class="op-query mt-3">
+                            <code>{"$addToSet": {"tags": "<span id="addtoset-display">unique</span>"}}</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- $pop Operator -->
+                <div class="operator-card">
+                    <div class="op-header">
+                        <h3>$pop (Retirer Extrême)</h3>
+                        <span class="badge">$pop</span>
+                    </div>
+                    <div class="op-body">
+                        <div class="segmented-control mb-4">
+                            <button id="pop-first" class="segment-btn " onclick="setPop(-1)">
+                                <i class='bx bx-chevrons-left'></i> Premier
+                            </button>
+                            <button id="pop-last" class="segment-btn active" onclick="setPop(1)">
+                                Dernier <i class='bx bx-chevrons-right'></i>
+                            </button>
+                        </div>
+                        <input type="hidden" id="pop-value" value="1">
+                        <button class="btn btn-sm btn-primary" onclick="testOperator('$pop')">Appliquer</button>
+                        <div class="op-query mt-3"><code>{"$pop": {"tags": <span id="pop-display">1</span>}}</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- $pull Operator -->
+                <div class="operator-card">
+                    <div class="op-header">
+                        <h3>$pull (Retirer Valeur)</h3>
+                        <span class="badge">$pull</span>
+                    </div>
+                    <div class="op-body">
+                        <div class="input-group">
+                            <span class="input-prefix"><i class='bx bx-trash'></i> Tag</span>
+                            <input type="text" id="pull-value" value="outdated">
+                        </div>
+                        <button class="btn btn-sm btn-primary mt-4" onclick="testOperator('$pull')">Appliquer</button>
+                        <div class="op-query mt-3">
+                            <code>{"$pull": {"tags": "<span id="pull-display">outdated</span>"}}</code>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -149,6 +375,41 @@
 
 {% block scripts %}
 <script>
+    // Initialize Pill Toggles
+    document.addEventListener('DOMContentLoaded', () => {
+        const pills = document.querySelectorAll('.pill-btn');
+        pills.forEach(pill => {
+            pill.addEventListener('click', () => {
+                pill.classList.toggle('active');
+            });
+        });
+    });
+
+    function togglePills(active) {
+        const pills = document.querySelectorAll('.pill-btn');
+        pills.forEach(pill => {
+            if (active) pill.classList.add('active');
+            else pill.classList.remove('active');
+        });
+    }
+
+    function setPop(val) {
+        document.getElementById('pop-value').value = val;
+        document.getElementById('pop-display').textContent = val;
+
+        // Toggle Active Classes
+        const btnFirst = document.getElementById('pop-first');
+        const btnLast = document.getElementById('pop-last');
+
+        if (val === -1) {
+            btnFirst.classList.add('active');
+            btnLast.classList.remove('active');
+        } else {
+            btnFirst.classList.remove('active');
+            btnLast.classList.add('active');
+        }
+    }
+
     async function testOperator(operator) {
         console.log('Testing operator:', operator);
         const tbody = document.getElementById('results-body');
@@ -178,15 +439,70 @@
                 document.getElementById('regex-display').textContent = val;
             }
             else if (operator === '$in') {
-                const checked = Array.from(document.querySelectorAll('.in-check:checked')).map(cb => cb.value);
+                // Get active pills
+                const activePills = document.querySelectorAll('#in-pills-container .pill-btn.active');
+                const checked = Array.from(activePills).map(btn => btn.dataset.value);
+
                 params = { field: 'categorie', values: checked };
+                document.getElementById('in-display').textContent = JSON.stringify(checked);
             }
             else if (operator === '$or') {
-                params = { conditions: [{ categorie: 'Chaussures' }, { prix: { '$lt': 50 } }] };
+                const catVal = document.getElementById('or-cat-value').value;
+                const priceVal = parseFloat(document.getElementById('or-price-value').value);
+
+                params = { conditions: [{ categorie: catVal }, { prix: { '$lt': priceVal } }] };
+
+                // Update display
+                document.getElementById('or-cat-display').textContent = catVal;
+                document.getElementById('or-price-display').textContent = priceVal;
             }
             else if (operator === '$where') {
                 const val = document.getElementById('where-value').value;
                 params = { expression: val };
+                document.getElementById('where-display').textContent = val;
+            }
+            // --- Update Operators ---
+            else if (operator === '$set') {
+                const val = parseFloat(document.getElementById('set-value').value);
+                params = { field: 'prix', value: val };
+                document.getElementById('set-display').textContent = val;
+            }
+            else if (operator === '$unset') {
+                const field = document.getElementById('unset-field').value;
+                params = { field: field };
+                document.getElementById('unset-display').textContent = field;
+            }
+            else if (operator === '$rename') {
+                const oldName = document.getElementById('rename-old').value;
+                const newName = document.getElementById('rename-new').value;
+                params = { field: oldName, newName: newName };
+                document.getElementById('rename-display').textContent = oldName;
+            }
+            else if (operator === '$currentDate') {
+                const field = document.getElementById('date-field').value;
+                params = { field: field, type: 'date' };
+                document.getElementById('date-display').textContent = field;
+            }
+            // --- Array Operators ---
+            else if (operator === '$push') {
+                const val = document.getElementById('push-value').value;
+                params = { field: 'tags', value: val };
+                document.getElementById('push-display').textContent = val;
+            }
+            else if (operator === '$addToSet') {
+                const val = document.getElementById('addtoset-value').value;
+                params = { field: 'tags', value: val };
+                document.getElementById('addtoset-display').textContent = val;
+            }
+            else if (operator === '$pop') {
+                const val = document.getElementById('pop-value').value;
+                params = { field: 'tags', value: val };
+                document.getElementById('pop-display').textContent = val;
+            }
+            else if (operator === '$pull') {
+                const val = document.getElementById('pull-value').value;
+                params = { field: 'tags', value: val };
+                document.getElementById('pull-display').textContent = val;
             }
 
             console.log('Sending params:', params);
@@ -202,7 +518,11 @@
             queryPreview.innerHTML = `Requête MongoDB: <code>${JSON.stringify(response.query)}</code>`;
 
             const data = response.data || [];
-            countBadge.textContent = `${response.count} résultats`;
+            if (response.modified_count !== undefined) {
+                countBadge.innerHTML = `<span style="color:var(--color-success)">${response.modified_count} modifiés</span> &bull; ${response.count} total`;
+            } else {
+                countBadge.textContent = `${response.count} résultats`;
+            }
 
             if (data.length === 0) {
                 // Fix: Use empty-content wrapper for empty state
