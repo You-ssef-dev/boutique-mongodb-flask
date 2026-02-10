@@ -14,7 +14,7 @@ from datetime import datetime
 from bson import ObjectId
 
 # --- Configuration ---
-MONGO_URI = "mongodb://boutiqueUser:BoutiquePass2024!@localhost:27017/BoutiqueComplete1?authSource=BoutiqueComplete1"
+MONGO_URI = "mongodb://localhost:27017"
 DATABASE_NAME = "BoutiqueComplete1"
 
 def get_database():
