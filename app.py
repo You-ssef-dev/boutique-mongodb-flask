@@ -15,7 +15,7 @@ app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 
 # --- MongoDB Configuration ---
-MONGO_URI = "mongodb://boutiqueUser:BoutiquePass2024!@localhost:27017/BoutiqueComplete1?authSource=BoutiqueComplete1"
+MONGO_URI = "mongodb://localhost:27017"
 DATABASE_NAME = "BoutiqueComplete1"
 
 def get_db():
